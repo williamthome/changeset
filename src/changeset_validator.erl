@@ -27,8 +27,8 @@ validate_data( Validate
 
 validate( Validate
         , Field
-        , #changeset{ default_value = Default 
-                    , errors  = Errors } = Changeset 
+        , #changeset{ default_value = Default
+                    , errors  = Errors } = Changeset
         , Map ) when is_function(Validate, 1)
                    , is_map(Map) ->
     case proplists:lookup(Field, Errors) of
@@ -39,7 +39,7 @@ validate( Validate
             case Validate(Value) of
                 ok ->
                     Changeset;
-                {ok, #changeset{} = NewChangeset} -> 
+                {ok, #changeset{} = NewChangeset} ->
                     NewChangeset;
                 {error, NewErrors} when is_list(NewErrors) ->
                     push_errors(NewErrors, Changeset);
@@ -53,7 +53,7 @@ validate_is_required(Fields) ->
 
 validate_is_required( [Field | T]
                     , #changeset{empty_values = EmptyValues} = Changeset ) ->
-    IsFieldValidOn = 
+    IsFieldValidOn =
         fun(Map) ->
             case maps:find(Field, Map) of
                 {ok, Value} ->
@@ -143,7 +143,7 @@ pop_change(Field) ->
     fun(Changeset) -> pop_change(Field, Changeset) end.
 
 pop_changes( Fields
-          , #changeset{changes = Changes} = Changeset 
+          , #changeset{changes = Changes} = Changeset
           ) when is_list(Fields) ->
     Changeset#changeset{changes = maps:without(Fields, Changes)}.
 
@@ -178,4 +178,3 @@ validate_is_required_test() ->
     ].
 
 -endif.
-
