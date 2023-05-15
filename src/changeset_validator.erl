@@ -85,9 +85,6 @@ fold(Funs, Changeset) ->
 
 % Value
 
-% FIXME: Maybe dialyzer false positive?
-% is_falsy(Value, #changeset{empty_values = EmptyValues}) ->
-%     is_falsy(Value, EmptyValues);
 is_falsy(Value, EmptyValues) when is_list(EmptyValues) ->
     lists:member(normalize(Value), EmptyValues).
 
