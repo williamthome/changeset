@@ -29,12 +29,12 @@ validate( Validate
         , Field
         , #changeset{ default_value = Default
                     , errors  = Errors } = Changeset
-        , Map ) when is_function(Validate, 1), is_map(Map) ->
+        , Map ) when is_function(Validate, 1) ->
     case proplists:lookup(Field, Errors) of
         {Field, _} ->
             Changeset;
         none ->
-            Value = maps:get(Field, Map, Default),
+            Value = get_field_value(Field, Map, Default),
             case Validate(Value) of
                 ok ->
                     Changeset;
@@ -74,6 +74,14 @@ fold(Funs, Changeset) ->
     lists:foldl(fun(F, CSet) -> F(CSet) end, Changeset, Funs).
 
 % Field
+
+get_field_value(Field, Map, Default) when is_map(Map), is_function(Default, 0) ->
+    case maps:find(Field, Map) of
+        {ok, Value} ->
+            Value;
+        error ->
+            Default()
+    end.
 
 is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
     case maps:find(Field, Data) of
