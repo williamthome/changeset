@@ -52,20 +52,11 @@ validate_is_required(Fields) ->
 
 validate_is_required( [Field | T]
                     , #changeset{empty_values = EmptyValues} = Changeset ) ->
-    IsFieldValidOn =
-        fun(Map) ->
-            case maps:find(Field, Map) of
-                {ok, Value} ->
-                    is_truthy(Value, EmptyValues);
-                error ->
-                    false
-            end
-        end,
-    case IsFieldValidOn(Changeset#changeset.changes) of
+    case is_field_value_truthy(Field, Changeset#changeset.changes, EmptyValues) of
         true ->
             validate_is_required(T, Changeset);
         false ->
-            case IsFieldValidOn(Changeset#changeset.data) of
+            case is_field_value_truthy(Field, Changeset#changeset.data, EmptyValues) of
                 true ->
                     validate_is_required(T, Changeset);
                 false ->
@@ -81,6 +72,16 @@ validate_is_required([], Changeset) ->
 
 fold(Funs, Changeset) ->
     lists:foldl(fun(F, CSet) -> F(CSet) end, Changeset, Funs).
+
+% Field
+
+is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
+    case maps:find(Field, Data) of
+        {ok, Value} ->
+            is_truthy(Value, EmptyValues);
+        error ->
+            false
+    end.
 
 % Value
 
