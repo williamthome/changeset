@@ -29,8 +29,7 @@ validate( Validate
         , Field
         , #changeset{ default_value = Default
                     , errors  = Errors } = Changeset
-        , Map ) when is_function(Validate, 1)
-                   , is_map(Map) ->
+        , Map ) when is_function(Validate, 1), is_map(Map) ->
     case proplists:lookup(Field, Errors) of
         {Field, _} ->
             Changeset;
@@ -124,10 +123,11 @@ push_change(Field, Value) ->
     fun(Changeset) -> push_change(Field, Value, Changeset) end.
 
 push_changes(Changes, Changeset) when is_list(Changes) ->
-    lists:foldl(fun({Field, Value}, CSet) -> push_change(Field, Value, CSet) end, Changeset, Changes);
+    lists:foldl( fun({Field, Value}, CSet) -> push_change(Field, Value, CSet) end
+               , Changeset
+               , Changes );
 push_changes( Changes
-            , #changeset{changes = CurrChanges} = Changeset
-            ) when is_map(Changes) ->
+            , #changeset{changes = CurrChanges} = Changeset ) when is_map(Changes) ->
     Changeset#changeset{changes = maps:merge(CurrChanges, Changes)}.
 
 push_changes(Changes) ->
@@ -140,8 +140,7 @@ pop_change(Field) ->
     fun(Changeset) -> pop_change(Field, Changeset) end.
 
 pop_changes( Fields
-          , #changeset{changes = Changes} = Changeset
-          ) when is_list(Fields) ->
+           , #changeset{changes = Changes} = Changeset ) when is_list(Fields) ->
     Changeset#changeset{changes = maps:without(Fields, Changes)}.
 
 pop_changes(Fields) ->
@@ -152,15 +151,15 @@ pop_changes(Fields) ->
 -ifdef(TEST).
 
 validate_is_required_test() ->
-    Changes = #changeset{ data = #{}
+    Changes = #changeset{ data    = #{}
                         , changes = #{foo => bar}
-                        , fields = [foo] },
+                        , fields  = [foo] },
     ValidChanges = validate_is_required([foo], Changes),
     InvalidChanges = validate_is_required([bar], Changes),
 
-    Data = #changeset{ data = #{foo => var}
+    Data = #changeset{ data    = #{foo => var}
                      , changes = #{}
-                     , fields = [foo] },
+                     , fields  = [foo] },
     ValidData = validate_is_required([foo], Data),
     InvalidData = validate_is_required([bar], Data),
 
