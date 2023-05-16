@@ -2,6 +2,8 @@
 
 -export([validate_change/3, validate_data/3, validate/4]).
 -export([validate_is_required/1, validate_is_required/2]).
+-export([validate_ok/0, validate_ok/1]).
+-export([validate_error/3, validate_errors/2]).
 -export([push_error/1, push_error/2]).
 -export([push_errors/1, push_errors/2]).
 -export([push_change/2, push_change/3]).
@@ -60,13 +62,33 @@ validate_is_required( [Field | T]
                 true ->
                     validate_is_required(T, Changeset);
                 false ->
-                    Error = {Field, { <<"is required">>
-                                    , [{validation, required}] }},
+                    Error = validate_error( Field
+                                          , <<"is required">>
+                                          , #{validation => is_required} ),
                     fold([ pop_change(Field), push_error(Error) ], Changeset)
             end
     end;
 validate_is_required([], Changeset) ->
     Changeset.
+
+validate_ok() ->
+    ok.
+
+validate_ok(#changeset{} = Changeset) ->
+    {ok, Changeset}.
+
+validate_error(Field, Msg, Meta) ->
+    {error, do_validate_error(Field, Msg, Meta)}.
+
+validate_errors(Field, Errors) ->
+    lists:map( fun({Msg, Meta}) -> do_validate_error(Field, Msg, Meta) end
+             , Errors ).
+
+do_validate_error(Field, Msg, Meta) when is_binary(Msg) ->
+    {Field, {Msg, Meta}};
+do_validate_error(Field, MsgFun, Meta) when is_function(MsgFun, 2) ->
+    Msg = MsgFun(Field, Meta),
+    do_validate_error(Field, Msg, Meta).
 
 % Changeset
 
