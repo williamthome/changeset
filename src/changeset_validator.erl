@@ -2,14 +2,18 @@
 
 -export([validate_change/3, validate_data/3, validate/4]).
 -export([validate_is_required/1, validate_is_required/2]).
--export([validate_ok/0, validate_ok/1]).
--export([validate_error/3, validate_errors/2]).
+
+-export_type([return/0]).
 
 -include("changeset.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
+
+-type return() :: #changeset{} | [error()].
+
+-callback validate(field()) -> fun((#changeset{}) -> return()).
 
 validate_change( Validate
                , Field
@@ -32,14 +36,12 @@ validate( Validate
         none ->
             Value = get_field_value(Field, Map, Default),
             case Validate(Value) of
-                ok ->
+                [] ->
                     Changeset;
-                {ok, #changeset{} = NewChangeset} ->
-                    NewChangeset;
-                {error, NewErrors} when is_list(NewErrors) ->
+                NewErrors when is_list(NewErrors) ->
                     changeset:push_errors(NewErrors, Changeset);
-                {error, Error} ->
-                    changeset:push_error(Error, Changeset)
+                #changeset{} = NewChangeset ->
+                    NewChangeset
             end
     end.
 
@@ -56,9 +58,9 @@ validate_is_required( [Field | T]
                 true ->
                     validate_is_required(T, Changeset);
                 false ->
-                    Error = validate_error( Field
-                                          , <<"is required">>
-                                          , #{validation => is_required} ),
+                    Error = changeset:error( Field
+                                           , <<"is required">>
+                                           , #{validation => is_required} ),
                     changeset:fold( [ changeset:pop_change(Field)
                                     , changeset:push_error(Error)
                                     ]
@@ -67,25 +69,6 @@ validate_is_required( [Field | T]
     end;
 validate_is_required([], Changeset) ->
     Changeset.
-
-validate_ok() ->
-    ok.
-
-validate_ok(#changeset{} = Changeset) ->
-    {ok, Changeset}.
-
-validate_error(Field, Msg, Meta) ->
-    {error, do_validate_error(Field, Msg, Meta)}.
-
-validate_errors(Field, Errors) ->
-    lists:map( fun({Msg, Meta}) -> do_validate_error(Field, Msg, Meta) end
-             , Errors ).
-
-do_validate_error(Field, Msg, Meta) when is_binary(Msg) ->
-    {Field, {Msg, Meta}};
-do_validate_error(Field, MsgFun, Meta) when is_function(MsgFun, 2) ->
-    Msg = MsgFun(Field, Meta),
-    do_validate_error(Field, Msg, Meta).
 
 % Field
 

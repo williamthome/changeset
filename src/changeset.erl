@@ -1,6 +1,7 @@
 -module(changeset).
 
 -export([fold/2]).
+-export([error/3]).
 -export([push_error/1, push_error/2]).
 -export([push_errors/1, push_errors/2]).
 -export([push_change/2, push_change/3]).
@@ -17,9 +18,16 @@ fold(Funs, Changeset) ->
 
 % Error
 
-push_error(Error, #changeset{errors = Errors} = Changeset) ->
-    Changeset#changeset{ errors = [Error | Errors]
-                       , is_valid = false }.
+error(Field, Msg, Meta) ->
+    {Field, {Msg, Meta}}.
+
+push_error( {Field, {Msg, Meta}}
+          , #changeset{errors = Errors} = Changeset) when is_binary(Msg) ->
+    Changeset#changeset{ errors = [{Field, {Msg, Meta}} | Errors]
+                    , is_valid = false };
+push_error({Field, {MsgFun, Meta}}, Changeset) when is_function(MsgFun, 2) ->
+    Msg = MsgFun(Field, Meta),
+    push_error({Field, {Msg, Meta}}, Changeset).
 
 push_error(Error) ->
     fun(Changeset) -> push_error(Error, Changeset) end.

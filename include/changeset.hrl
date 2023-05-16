@@ -1,11 +1,16 @@
 % NOTE: Fields cannot be a string(). Some functions will
 %       crash when traversing the fields list.
--type field() :: term().
--type type()  :: string
-               | number
-               | map
-               | term().
--type error() :: {field(), {string(), [tuple()]}} | term().
+-type field()  :: term().
+-type meta()   :: term().
+-type msg()    :: binary().
+-type msgfun() :: fun((field(), meta()) -> binary()).
+% TODO: Improve types and find a way to check using dialyzer
+-type type()   :: string
+                | number
+                | map
+                | term()
+                .
+-type error()  :: {field(), {msg(), meta()}}.
 
 -record(changeset,
     { fields       = []         :: [field()]
