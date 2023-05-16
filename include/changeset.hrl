@@ -9,7 +9,7 @@
 
 -record(changeset,
     { fields       = []         :: [field()]
-    , types        = #{}        :: #{field() => type() | [type()]}
+    , types        = #{}        :: #{field() => [type()]}
     , data         = #{}        :: #{field() => term()}
     , changes      = #{}        :: #{field() => term()}
     , errors       = []         :: [error()]
