@@ -1,3 +1,9 @@
+%%%-----------------------------------------------------------------------------
+%%% @author William Fank Thomé [https://github.com/williamthome]
+%%% @copyright 2023 William Fank Thomé
+%%% @doc Changeset module.
+%%% @end
+%%%-----------------------------------------------------------------------------
 -module(changeset).
 
 -export([is_valid/1, get_changes/1]).

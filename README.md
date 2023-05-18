@@ -1,9 +1,7 @@
-changeset
-=====
+# changeset
 
-An OTP library
+An OTP library based on Ecto changeset library (Elixir).
 
-Build
------
+## Build
 
     $ rebar3 compile

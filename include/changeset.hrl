@@ -1,3 +1,10 @@
+%%%-----------------------------------------------------------------------------
+%%% @author William Fank Thomé [https://github.com/williamthome]
+%%% @copyright 2023 William Fank Thomé
+%%% @doc Changeset header.
+%%% @end
+%%%-----------------------------------------------------------------------------
+
 % NOTE: Fields cannot be a string(). Some functions will
 %       crash when traversing the fields list.
 -type field()  :: term().

@@ -1,3 +1,9 @@
+%%%-----------------------------------------------------------------------------
+%%% @author William Fank Thomé [https://github.com/williamthome]
+%%% @copyright 2023 William Fank Thomé
+%%% @doc Binary validator module.
+%%% @end
+%%%-----------------------------------------------------------------------------
 -module(changeset_validate_is_binary).
 
 -behaviour(changeset_validator).
