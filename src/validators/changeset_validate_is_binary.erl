@@ -31,11 +31,11 @@ validate_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(Validate(#changeset{changes = #{foo => <<>>}})))
       }
+    , { "Should be valid when field is missing"
+      , ?assert(changeset:is_valid(Validate(#changeset{changes = #{}})))
+      }
     , { "Should be invalid when field is not a binary"
       , ?assertNot(changeset:is_valid(Validate(#changeset{changes = #{foo => bar}})))
-      }
-    , { "Should be invalid when field is missing"
-      , ?assertNot(changeset:is_valid(Validate(#changeset{changes = #{}})))
       }
     ].
 

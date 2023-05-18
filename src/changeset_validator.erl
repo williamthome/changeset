@@ -18,18 +18,24 @@
 validate_change( Validate
                , Field
                , #changeset{changes = Changes} = Changeset ) ->
-    validate(Validate, Field, Changeset, Changes).
+    validate(Validate, Field, Changes, Changeset).
 
 validate_data( Validate
              , Field
              , #changeset{data = Data} = Changeset ) ->
-    validate(Validate, Field, Changeset, Data).
+    validate(Validate, Field, Data, Changeset).
 
-validate( Validate
-        , Field
-        , #changeset{ default = Default
-                    , errors  = Errors } = Changeset
-        , Map ) when is_function(Validate, 1) ->
+validate(Validate, Field, Data, #changeset{} = Changeset)
+    when is_function(Validate, 1)
+       , is_map(Data) ->
+    do_validate(Field, Data, Validate, Changeset).
+
+do_validate( Field
+           , Map
+           , Validate
+           , #changeset{ default = Default
+                       , errors  = Errors } = Changeset )
+    when is_map_key(Field, Map) ->
     case proplists:lookup(Field, Errors) of
         {Field, _} ->
             Changeset;
@@ -43,7 +49,9 @@ validate( Validate
                 #changeset{} = NewChangeset ->
                     NewChangeset
             end
-    end.
+    end;
+do_validate(_, _, _, Changeset) ->
+    Changeset.
 
 validate_is_required(Fields) ->
     fun(Changeset) -> validate_is_required(Fields, Changeset) end.
