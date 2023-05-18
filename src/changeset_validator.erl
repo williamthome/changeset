@@ -124,13 +124,17 @@ validate_is_required_test() ->
     InvalidData = validate_is_required([bar], Data),
 
     [ { "Should have valid changes"
-      , ?assert(ValidChanges#changeset.is_valid) },
-      { "Should have invalid changes"
-      , ?assertNot(InvalidChanges#changeset.is_valid) },
-      { "Should have valid data"
-      , ?assert(ValidData#changeset.is_valid) },
-      { "Should have invalid data"
-      , ?assertNot(InvalidData#changeset.is_valid) }
+      , ?assert(ValidChanges#changeset.is_valid)
+      }
+    , { "Should have invalid changes"
+      , ?assertNot(InvalidChanges#changeset.is_valid)
+      }
+    , { "Should have valid data"
+      , ?assert(ValidData#changeset.is_valid)
+      }
+    , { "Should have invalid data"
+      , ?assertNot(InvalidData#changeset.is_valid)
+      }
     ].
 
 -endif.
