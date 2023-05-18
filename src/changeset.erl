@@ -1,5 +1,6 @@
 -module(changeset).
 
+-export([is_valid/1]).
 -export([fold/2]).
 -export([error/3]).
 -export([push_error/1, push_error/2]).
@@ -10,6 +11,11 @@
 -export([pop_changes/1, pop_changes/2]).
 
 -include("changeset.hrl").
+
+% Props
+
+is_valid(#changeset{is_valid = IsValid}) ->
+    IsValid.
 
 % Map
 
