@@ -10,13 +10,14 @@
                 | boolean
                 | float
                 | function
+                | {function, arity()}
                 | integer
                 | list
                 | map
-                | number
                 | pid
                 | port
-                | record
+                | {record, RecordTag :: atom()}
+                | {record, RecordTag :: atom(), Size :: non_neg_integer()}
                 | reference
                 | tuple
                 | term()
