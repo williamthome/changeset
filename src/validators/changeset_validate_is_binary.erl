@@ -31,6 +31,7 @@ validate_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(Validate(#changeset{changes = #{foo => <<>>}})))
       }
+      % TODO: Move missing field test to validator module
     , { "Should be valid when field is missing"
       , ?assert(changeset:is_valid(Validate(#changeset{changes = #{}})))
       }
