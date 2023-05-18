@@ -4,10 +4,21 @@
 -type meta()   :: term().
 -type msg()    :: binary().
 -type msgfun() :: fun((field(), meta()) -> binary()).
-% TODO: Improve types and find a way to check using dialyzer
--type type()   :: string
-                | number
+-type type()   :: atom
+                | binary
+                | bitstring
+                | boolean
+                | float
+                | function
+                | integer
+                | list
                 | map
+                | number
+                | pid
+                | port
+                | record
+                | reference
+                | tuple
                 | term()
                 .
 -type error()  :: {field(), {msg(), meta()}}.
