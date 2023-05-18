@@ -1,6 +1,7 @@
 -module(changeset).
 
--export([is_valid/1]).
+-export([is_valid/1, get_changes/1]).
+-export([cast/3, cast/4]).
 -export([fold/2]).
 -export([error/3]).
 -export([push_error/1, push_error/2]).
@@ -12,10 +13,77 @@
 
 -include("changeset.hrl").
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
+
 % Props
 
 is_valid(#changeset{is_valid = IsValid}) ->
     IsValid.
+
+get_changes(#changeset{changes = Changes}) ->
+    Changes.
+
+% Cast
+
+cast(Changeset, Params, Permitted) ->
+    cast(Changeset, Params, Permitted, #{}).
+
+cast( Changeset = #changeset{ data = Data
+                            , types = Types
+                            }
+    , Params
+    , Permitted
+    , Opts ) when is_map(Data)
+                , is_map(Types)
+                , is_map(Params)
+                , is_list(Permitted)
+                , is_map(Opts) ->
+    Changes =
+        maps:filter(
+            fun(Field, Value) ->
+                case lists:member(Field, Permitted) of
+                    true ->
+                        case maps:find(Field, Data) of
+                            {ok, CurrValue} when is_float(Value)
+                                               ; is_float(CurrValue) ->
+                                CurrValue /= Value;
+                            {ok, CurrValue} ->
+                                CurrValue =/= Value;
+                            error ->
+                                true
+                        end;
+                    false ->
+                        false
+                end
+            end,
+            Params
+        ),
+    Validators =
+        lists:map(
+            fun(Field) ->
+                FieldType = maps:get(Field, Types),
+                case changeset_validator:validator_by_field_type(FieldType) of
+                    {ok, Validator} ->
+                        Validator:validate(Field);
+                    error ->
+                        % TODO: Handle custom types, e.g.:
+                        %           CustomValidators = maps:get(custom_types_validator, Opts),
+                        %           CustomValidator = maps:get(FieldType, CustomValidators),
+                        %           CustomValidator:validate(Field)
+                        error({unhandled_field_type, Field})
+                end
+            end,
+            maps:keys(Changes)
+        ),
+    % TODO: Check if changes should be merged instead of overridden
+    fold(Validators, Changeset#changeset{changes = Changes});
+cast({Data, Types}, Changes, Permitted, Opts) ->
+    Changeset = #changeset{ data  = Data
+                          , types = Types
+                          },
+    cast(Changeset, Changes, Permitted, Opts).
 
 % Map
 
@@ -79,3 +147,55 @@ pop_changes( Fields
 
 pop_changes(Fields) ->
     fun(Changeset) -> pop_changes(Fields, Changeset) end.
+
+% Test
+
+-ifdef(TEST).
+
+cast_test() ->
+    [ { "Should be valid"
+      , ?assert(is_valid(cast( { #{}, #{foo => binary} }
+                             , #{foo => <<>>}
+                             , [foo]
+                             )
+                        )
+               )
+      }
+    , { "Should raise when unhandled field type"
+      , ?assertError( {unhandled_field_type, foo}
+                    , is_valid(cast( { #{}, #{foo => notype} }
+                                   , #{foo => <<>>}
+                                   , [foo]
+                                   )
+                              )
+                    )
+      }
+    , { "Should be invalid"
+      , ?assertNot(is_valid(cast( { #{}, #{foo => binary} }
+                                , #{foo => bar}
+                                , [foo]
+                                )
+                           )
+                  )
+      }
+    , { "Should push change"
+      , ?assertEqual( #{foo => <<>>}
+                    , get_changes(cast( { #{}, #{foo => binary} }
+                                      , #{foo => <<>>}
+                                      , [foo]
+                                      )
+                                 )
+                    )
+      }
+    , { "Should not push change"
+      , ?assertEqual( #{}
+                    , get_changes(cast( { #{foo => <<>>}, #{foo => binary} }
+                                      , #{foo => <<>>}
+                                      , [foo]
+                                      )
+                                 )
+                    )
+      }
+    ].
+
+-endif.

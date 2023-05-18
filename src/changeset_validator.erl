@@ -2,6 +2,7 @@
 
 -export([validate_change/3, validate_data/3, validate/4]).
 -export([validate_is_required/1, validate_is_required/2]).
+-export([validator_by_field_type/1]).
 
 -export_type([return/0]).
 
@@ -100,6 +101,10 @@ is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
         error ->
             false
     end.
+
+% TODO: All built-in validators
+validator_by_field_type(binary) -> {ok, changeset_validate_is_binary};
+validator_by_field_type(_) -> error.
 
 % Value
 
