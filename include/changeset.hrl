@@ -23,11 +23,10 @@
                 | map
                 | pid
                 | port
-                | {record, RecordTag :: atom()}
-                | {record, RecordTag :: atom(), Size :: non_neg_integer()}
+                | {record, Name :: atom()}
+                | {record, Name :: atom(), Size :: non_neg_integer()}
                 | reference
                 | tuple
-                | term()
                 .
 -type error()  :: {field(), {msg(), meta()}}.
 

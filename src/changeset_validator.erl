@@ -8,7 +8,7 @@
 
 -export([validate_change/3, validate_data/3, validate/4]).
 -export([validate_is_required/1, validate_is_required/2]).
--export([validator_by_field_type/1]).
+-export([validator_by_field_type/2]).
 
 -export_type([return/0]).
 
@@ -108,9 +108,38 @@ is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
             false
     end.
 
-% TODO: All built-in validators
-validator_by_field_type(binary) -> {ok, changeset_validate_is_binary};
-validator_by_field_type(_) -> error.
+validator_by_field_type(atom, Field) ->
+    changeset_validate_is_atom:validate(Field);
+validator_by_field_type(binary, Field) ->
+    changeset_validate_is_binary:validate(Field);
+validator_by_field_type(bitstring, Field) ->
+    changeset_validate_is_bitstring:validate(Field);
+validator_by_field_type(boolean, Field) ->
+    changeset_validate_is_boolean:validate(Field);
+validator_by_field_type(float, Field) ->
+    changeset_validate_is_float:validate(Field);
+validator_by_field_type(function, Field) ->
+    changeset_validate_is_function:validate(Field);
+validator_by_field_type({function, Arity}, Field) ->
+    changeset_validate_is_function:validate({Field, Arity});
+validator_by_field_type(integer, Field) ->
+    changeset_validate_is_integer:validate(Field);
+validator_by_field_type(list, Field) ->
+    changeset_validate_is_list:validate(Field);
+validator_by_field_type(map, Field) ->
+    changeset_validate_is_map:validate(Field);
+validator_by_field_type(pid, Field) ->
+    changeset_validate_is_pid:validate(Field);
+validator_by_field_type(port, Field) ->
+    changeset_validate_is_port:validate(Field);
+validator_by_field_type({record, Name}, Field) ->
+    changeset_validate_is_record:validate({Field, Name});
+validator_by_field_type({record, Name, Size}, Field) ->
+    changeset_validate_is_record:validate({Field, Name, Size});
+validator_by_field_type(reference, Field) ->
+    changeset_validate_is_reference:validate(Field);
+validator_by_field_type(tuple, Field) ->
+    changeset_validate_is_tuple:validate(Field).
 
 % Value
 

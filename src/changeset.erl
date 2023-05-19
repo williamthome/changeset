@@ -70,16 +70,7 @@ cast( Changeset = #changeset{ data = Data
         lists:map(
             fun(Field) ->
                 FieldType = maps:get(Field, Types),
-                case changeset_validator:validator_by_field_type(FieldType) of
-                    {ok, Validator} ->
-                        Validator:validate(Field);
-                    error ->
-                        % TODO: Handle custom types, e.g.:
-                        %           CustomValidators = maps:get(custom_types_validator, Opts),
-                        %           CustomValidator = maps:get(FieldType, CustomValidators),
-                        %           CustomValidator:validate(Field)
-                        error({unhandled_field_type, Field})
-                end
+                changeset_validator:validator_by_field_type(FieldType, Field)
             end,
             maps:keys(Changes)
         ),
@@ -166,15 +157,6 @@ cast_test() ->
                              )
                         )
                )
-      }
-    , { "Should raise when unhandled field type"
-      , ?assertError( {unhandled_field_type, foo}
-                    , is_valid(cast( { #{}, #{foo => notype} }
-                                   , #{foo => <<>>}
-                                   , [foo]
-                                   )
-                              )
-                    )
       }
     , { "Should be invalid"
       , ?assertNot(is_valid(cast( { #{}, #{foo => binary} }

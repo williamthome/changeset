@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Binary validator module.
+%%% @doc Atom validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_validate_is_binary).
+-module(changeset_validate_is_atom).
 
 -behaviour(changeset_validator).
 
@@ -17,12 +17,12 @@
 validate(Field) ->
     fun(Changeset) ->
         changeset_validator:validate_change(fun
-            (Binary) when is_binary(Binary) ->
+            (Atom) when is_atom(Atom) ->
                 [];
             (_) ->
                 [ changeset:error( Field
-                                 , <<"must be a binary">>
-                                 , #{validation => is_binary} ) ]
+                                 , <<"must be an atom">>
+                                 , #{validation => is_atom} ) ]
         end, Field, Changeset)
     end.
 
@@ -35,14 +35,10 @@ validate(Field) ->
 validate_test() ->
     Validate = validate(foo),
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(Validate(#changeset{changes = #{foo => <<>>}})))
+      , ?assert(changeset:is_valid(Validate(#changeset{changes = #{foo => bar}})))
       }
-      % TODO: Move missing field test to validator module
-    , { "Should be valid when field is missing"
-      , ?assert(changeset:is_valid(Validate(#changeset{changes = #{}})))
-      }
-    , { "Should be invalid when field is not a binary"
-      , ?assertNot(changeset:is_valid(Validate(#changeset{changes = #{foo => bar}})))
+    , { "Should be invalid when field is not an atom"
+      , ?assertNot(changeset:is_valid(Validate(#changeset{changes = #{foo => <<>>}})))
       }
     ].
 
