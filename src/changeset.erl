@@ -33,8 +33,8 @@ get_changes(#changeset{changes = Changes}) ->
 
 % Cast
 
-cast(Changeset, Params, Permitted) ->
-    cast(Changeset, Params, Permitted, #{}).
+cast(Payload, Params, Permitted) ->
+    cast(Payload, Params, Permitted, #{}).
 
 cast( Changeset = #changeset{ data = Data
                             , types = Types
