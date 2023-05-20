@@ -72,11 +72,11 @@ cast( Changeset = #changeset{ data = Data
         Changeset#changeset{changes = Changes},
         maps:keys(Changes)
     );
-cast({Data, Types}, Changes, Permitted, Opts) ->
+cast({Data, Types}, Params, Permitted, Opts) ->
     Changeset = #changeset{ data  = Data
                           , types = Types
                           },
-    cast(Changeset, Changes, Permitted, Opts).
+    cast(Changeset, Params, Permitted, Opts).
 
 % Map
 
