@@ -78,7 +78,7 @@ validate_is_required(Fields) ->
     fun(Changeset) -> validate_is_required(Changeset, Fields) end.
 
 validate_is_required(#changeset{} = Changeset, Fields) when is_list(Fields) ->
-    do_validate_is_required(Fields, Changeset).
+    do_validate_is_required(Fields, Changeset#changeset{required = Fields}).
 
 do_validate_is_required( [Field | T]
                        , #changeset{empty_values = EmptyValues} = Changeset ) ->
@@ -156,6 +156,8 @@ validate_is_required_test() ->
     ValidData = validate_is_required(DataChangeset, [foo]),
     InvalidData = validate_is_required(DataChangeset, [bar]),
 
+    Required = validate_is_required(#changeset{}, [foo, bar]),
+
     [ { "Should have valid changes"
       , ?assert(ValidChanges#changeset.is_valid)
       }
@@ -167,6 +169,9 @@ validate_is_required_test() ->
       }
     , { "Should have invalid data"
       , ?assertNot(InvalidData#changeset.is_valid)
+      }
+    , { "Should have required fields"
+      , ?assertEqual([foo, bar], Required#changeset.required)
       }
     ].
 

@@ -34,6 +34,7 @@
 -record(changeset,
     { fields       = []         :: [field()]
     , types        = #{}        :: #{field() := type()}
+    , required     = []         :: [field()]
     , data         = #{}        :: #{field() => term()}
     , changes      = #{}        :: #{field() => term()}
     , errors       = []         :: [error()]

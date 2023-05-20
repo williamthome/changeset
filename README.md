@@ -44,6 +44,7 @@ we can type the following:
 1> movie:changeset(#{}).
 {changeset,[],
            #{name => binary},
+           [name],
            #{},#{},
            [{name,{<<"is required">>,#{validation => is_required}}}],
            false,no_default,
@@ -53,6 +54,7 @@ we can type the following:
 2> movie:changeset(#{name => foo}).
 {changeset,[],
            #{name => binary},
+           [name],
            #{},
            #{name => foo},
            [{name,{<<"must be a binary">>,#{validation => is_binary}}}],
@@ -63,6 +65,7 @@ we can type the following:
 3> movie:changeset(#{name => <<"Erlang: The Movie">>}).
 {changeset,[],
            #{name => binary},
+           [name],
            #{},
            #{name => <<"Erlang: The Movie">>},
            [],true,no_default,
@@ -77,6 +80,7 @@ Currently, this is the changeset record
 -record(changeset,
     { fields       = []         :: [field()]
     , types        = #{}        :: #{field() := type()}
+    , required     = []         :: [field()]
     , data         = #{}        :: #{field() => term()}
     , changes      = #{}        :: #{field() => term()}
     , errors       = []         :: [error()]
