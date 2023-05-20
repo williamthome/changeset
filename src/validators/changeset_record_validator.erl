@@ -4,7 +4,7 @@
 %%% @doc Record validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_record).
+-module(changeset_record_validator).
 
 -behaviour(changeset_type_validator).
 

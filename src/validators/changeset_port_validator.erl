@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Map validator module.
+%%% @doc Port validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_map).
+-module(changeset_port_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Map) when is_map(Map) ->
+        (Port) when is_port(Port) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be a map">>
-                             , #{validation => is_map} ) ]
+                             , <<"must be a port">>
+                             , #{validation => is_port} ) ]
     end).
 
 % Test
@@ -32,9 +32,9 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => #{}}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => list_to_port("#Port<0.4>")}})))
       }
-    , { "Should be invalid when field is not a map"
+    , { "Should be invalid when field is not a port"
       , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].

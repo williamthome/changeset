@@ -4,7 +4,7 @@
 %%% @doc Function validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_function).
+-module(changeset_function_validator).
 
 -behaviour(changeset_type_validator).
 

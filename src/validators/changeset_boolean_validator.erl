@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Integer validator module.
+%%% @doc Boolean validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_integer).
+-module(changeset_boolean_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Integer) when is_integer(Integer) ->
+        (Boolean) when is_boolean(Boolean) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be an integer">>
-                             , #{validation => is_integer} ) ]
+                             , <<"must be a boolean">>
+                             , #{validation => is_boolean} ) ]
     end).
 
 % Test
@@ -32,9 +32,9 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => 0}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => true}})))
       }
-    , { "Should be invalid when field is not an integer"
+    , { "Should be invalid when field is not a boolean"
       , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].

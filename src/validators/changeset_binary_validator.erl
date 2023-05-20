@@ -4,7 +4,7 @@
 %%% @doc Binary validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_binary).
+-module(changeset_binary_validator).
 
 -behaviour(changeset_type_validator).
 

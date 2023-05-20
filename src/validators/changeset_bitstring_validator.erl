@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Boolean validator module.
+%%% @doc Bitstring validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_boolean).
+-module(changeset_bitstring_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Boolean) when is_boolean(Boolean) ->
+        (Bitstring) when is_bitstring(Bitstring) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be a boolean">>
-                             , #{validation => is_boolean} ) ]
+                             , <<"must be a bitstring">>
+                             , #{validation => is_bitstring} ) ]
     end).
 
 % Test
@@ -32,9 +32,9 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => true}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => <<>>}})))
       }
-    , { "Should be invalid when field is not a boolean"
+    , { "Should be invalid when field is not a bitstring"
       , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].

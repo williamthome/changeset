@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Bitstring validator module.
+%%% @doc Pid validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_bitstring).
+-module(changeset_pid_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Bitstring) when is_bitstring(Bitstring) ->
+        (Pid) when is_pid(Pid) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be a bitstring">>
-                             , #{validation => is_bitstring} ) ]
+                             , <<"must be a pid">>
+                             , #{validation => is_pid} ) ]
     end).
 
 % Test
@@ -32,9 +32,9 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => <<>>}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => list_to_pid("<0.4.1>")}})))
       }
-    , { "Should be invalid when field is not a bitstring"
+    , { "Should be invalid when field is not a pid"
       , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].

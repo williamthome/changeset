@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Atom validator module.
+%%% @doc Integer validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_atom).
+-module(changeset_integer_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Atom) when is_atom(Atom) ->
+        (Integer) when is_integer(Integer) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be an atom">>
-                             , #{validation => is_atom} ) ]
+                             , <<"must be an integer">>
+                             , #{validation => is_integer} ) ]
     end).
 
 % Test
@@ -32,10 +32,10 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => 0}})))
       }
-    , { "Should be invalid when field is not an atom"
-      , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => <<>>}})))
+    , { "Should be invalid when field is not an integer"
+      , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].
 

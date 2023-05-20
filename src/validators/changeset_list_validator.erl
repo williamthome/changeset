@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Float validator module.
+%%% @doc List validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_float).
+-module(changeset_list_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Float) when is_float(Float) ->
+        (List) when is_list(List) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be a float">>
-                             , #{validation => is_float} ) ]
+                             , <<"must be a list">>
+                             , #{validation => is_list} ) ]
     end).
 
 % Test
@@ -32,9 +32,9 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => 0.0}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => []}})))
       }
-    , { "Should be invalid when field is not a float"
+    , { "Should be invalid when field is not a list"
       , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].

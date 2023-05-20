@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Port validator module.
+%%% @doc Tuple validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_type_validator_is_port).
+-module(changeset_tuple_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Port) when is_port(Port) ->
+        (Tuple) when is_tuple(Tuple) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be a port">>
-                             , #{validation => is_port} ) ]
+                             , <<"must be a tuple">>
+                             , #{validation => is_tuple} ) ]
     end).
 
 % Test
@@ -32,9 +32,9 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => list_to_port("#Port<0.4>")}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => {}}})))
       }
-    , { "Should be invalid when field is not a port"
+    , { "Should be invalid when field is not a tuple"
       , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].
