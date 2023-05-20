@@ -1,3 +1,9 @@
+%%%-----------------------------------------------------------------------------
+%%% @author William Fank Thomé [https://github.com/williamthome]
+%%% @copyright 2023 William Fank Thomé
+%%% @doc Type validator module.
+%%% @end
+%%%-----------------------------------------------------------------------------
 -module(changeset_type_validator).
 
 -export([validate_change/2]).
