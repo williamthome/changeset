@@ -14,7 +14,6 @@
         , validate/4
         ]).
 -export([validate_is_required/1, validate_is_required/2]).
--export([validate_change_by_field_type/3]).
 
 -include("changeset.hrl").
 
@@ -126,41 +125,6 @@ is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
         error ->
             false
     end.
-
-validate_change_by_field_type(atom, Field, Changeset) ->
-    changeset_type_validator_is_atom:validate_change(Field, Changeset);
-validate_change_by_field_type(binary, Field, Changeset) ->
-    changeset_type_validator_is_binary:validate_change(Field, Changeset);
-validate_change_by_field_type(bitstring, Field, Changeset) ->
-    changeset_type_validator_is_bitstring:validate_change(Field, Changeset);
-validate_change_by_field_type(boolean, Field, Changeset) ->
-    changeset_type_validator_is_boolean:validate_change(Field, Changeset);
-validate_change_by_field_type(float, Field, Changeset) ->
-    changeset_type_validator_is_float:validate_change(Field, Changeset);
-validate_change_by_field_type(function, Field, Changeset) ->
-    changeset_type_validator_is_function:validate_change(Field, Changeset);
-validate_change_by_field_type({function, Arity}, Field, Changeset) ->
-    changeset_type_validator_is_function:validate_change({Field, Arity}, Changeset);
-validate_change_by_field_type(integer, Field, Changeset) ->
-    changeset_type_validator_is_integer:validate_change(Field, Changeset);
-validate_change_by_field_type(list, Field, Changeset) ->
-    changeset_type_validator_is_list:validate_change(Field, Changeset);
-validate_change_by_field_type(map, Field, Changeset) ->
-    changeset_type_validator_is_map:validate_change(Field, Changeset);
-validate_change_by_field_type(pid, Field, Changeset) ->
-    changeset_type_validator_is_pid:validate_change(Field, Changeset);
-validate_change_by_field_type(port, Field, Changeset) ->
-    changeset_type_validator_is_port:validate_change(Field, Changeset);
-validate_change_by_field_type(record, Field, Changeset) ->
-    changeset_type_validator_is_record:validate_change(Field, Changeset);
-validate_change_by_field_type({record, Name}, Field, Changeset) ->
-    changeset_type_validator_is_record:validate_change({Field, Name}, Changeset);
-validate_change_by_field_type({record, Name, Size}, Field, Changeset) ->
-    changeset_type_validator_is_record:validate_change({Field, Name, Size}, Changeset);
-validate_change_by_field_type(reference, Field, Changeset) ->
-    changeset_type_validator_is_reference:validate_change(Field, Changeset);
-validate_change_by_field_type(tuple, Field, Changeset) ->
-    changeset_type_validator_is_tuple:validate_change(Field, Changeset).
 
 % Value
 

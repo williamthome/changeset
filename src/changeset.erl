@@ -67,10 +67,7 @@ cast( Changeset = #changeset{ data = Data
             Params
         ),
     lists:foldl(
-        fun(Field, ChangesetAcc) ->
-            FieldType = maps:get(Field, Types),
-            changeset_validator:validate_change_by_field_type(FieldType, Field, ChangesetAcc)
-        end,
+        fun changeset_type_validator:validate_change/2,
         % TODO: Check if changes should be merged instead of overridden
         Changeset#changeset{changes = Changes},
         maps:keys(Changes)
