@@ -23,6 +23,7 @@
                 | map
                 | pid
                 | port
+                | record
                 | {record, Name :: atom()}
                 | {record, Name :: atom(), Size :: non_neg_integer()}
                 | reference

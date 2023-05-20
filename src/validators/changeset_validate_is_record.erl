@@ -49,7 +49,9 @@ validate({Field, Name, Size}) ->
                                             } ) ]
                 end
         end, Field, Changeset)
-    end.
+    end;
+validate(Field) when is_atom(Field) ->
+    validate({Field, Field}).
 
 % Test
 

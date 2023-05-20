@@ -132,6 +132,8 @@ validator_by_field_type(pid, Field) ->
     changeset_validate_is_pid:validate(Field);
 validator_by_field_type(port, Field) ->
     changeset_validate_is_port:validate(Field);
+validator_by_field_type(record, Field) ->
+    changeset_validate_is_record:validate(Field);
 validator_by_field_type({record, Name}, Field) ->
     changeset_validate_is_record:validate({Field, Name});
 validator_by_field_type({record, Name, Size}, Field) ->
