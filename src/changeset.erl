@@ -8,7 +8,7 @@
 
 -export([is_valid/1, get_changes/1]).
 -export([cast/3, cast/4]).
--export([fold/2]).
+-export([pipe/2]).
 -export([error/3]).
 -export([push_error/1, push_error/2]).
 -export([push_errors/1, push_errors/2]).
@@ -75,7 +75,7 @@ cast( Changeset = #changeset{ data = Data
             maps:keys(Changes)
         ),
     % TODO: Check if changes should be merged instead of overridden
-    fold(Validators, Changeset#changeset{changes = Changes});
+    pipe(Changeset#changeset{changes = Changes}, Validators);
 cast({Data, Types}, Changes, Permitted, Opts) ->
     Changeset = #changeset{ data  = Data
                           , types = Types
@@ -84,7 +84,7 @@ cast({Data, Types}, Changes, Permitted, Opts) ->
 
 % Map
 
-fold(Funs, Changeset) ->
+pipe(Changeset, Funs) ->
     lists:foldl(fun(F, CSet) -> F(CSet) end, Changeset, Funs).
 
 % Error

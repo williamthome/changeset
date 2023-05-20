@@ -76,10 +76,11 @@ validate_is_required( [Field | T]
                     Error = changeset:error( Field
                                            , <<"is required">>
                                            , #{validation => is_required} ),
-                    changeset:fold( [ changeset:pop_change(Field)
+                    changeset:pipe( Changeset,
+                                    [ changeset:pop_change(Field)
                                     , changeset:push_error(Error)
                                     ]
-                                  , Changeset )
+                                  )
             end
     end;
 validate_is_required([], Changeset) ->

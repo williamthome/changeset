@@ -24,10 +24,10 @@ changeset(Params) ->
 
 changeset(Data, Params) ->
     Changeset = changeset:cast({Data, ?TYPES}, Params, ?PERMITTED),
-    changeset:fold([
+    changeset:pipe(Changeset, [
         changeset_validator:validate_is_required(?REQUIRED)
         % More validators here...
-    ], Changeset).
+    ]).
 ```
 
 Now running
