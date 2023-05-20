@@ -4,18 +4,18 @@
 %%% @doc Float validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_validate_is_float).
+-module(changeset_type_validator_is_float).
 
--behaviour(changeset_validator).
+-behaviour(changeset_type_validator).
 
--export([validate/1]).
+-export([validate_change/2]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
-validate(Field) ->
-    changeset_validator:validate_change(Field, fun
+validate_change(Field, Changeset) ->
+    changeset_validator:validate_change(Changeset, Field, fun
         (Float) when is_float(Float) ->
             [];
         (_) ->
@@ -30,13 +30,12 @@ validate(Field) ->
 
 -include("changeset.hrl").
 
-validate_test() ->
-    Validate = validate(foo),
+validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(Validate(#changeset{changes = #{foo => 0.0}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => 0.0}})))
       }
     , { "Should be invalid when field is not a float"
-      , ?assertNot(changeset:is_valid(Validate(#changeset{changes = #{foo => bar}})))
+      , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
       }
     ].
 

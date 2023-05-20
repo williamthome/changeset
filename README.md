@@ -26,7 +26,8 @@ changeset(Data, Params) ->
     Changeset = changeset:cast({Data, ?TYPES}, Params, ?PERMITTED),
     changeset:pipe(Changeset, [
         changeset_validator:validate_is_required(?REQUIRED)
-        % More validators here...
+        % More validators here, e.g.:
+        % changeset_validator:validate_change(name, fun(_Name) -> [] end)
     ]).
 ```
 

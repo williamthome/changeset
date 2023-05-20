@@ -14,9 +14,7 @@
         , validate/4
         ]).
 -export([validate_is_required/1, validate_is_required/2]).
--export([validator_by_field_type/2]).
-
--export_type([return/0]).
+-export([validate_change_by_field_type/3]).
 
 -include("changeset.hrl").
 
@@ -24,36 +22,32 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--type return() :: #changeset{} | [error()].
-
--callback validate(field()) -> fun((#changeset{}) -> return()).
-
 validate_change(Field, Validate) ->
     fun(#changeset{changes = Changes} = Changeset) ->
-        validate(Field, Validate, Changes, Changeset)
+        validate(Changeset, Field, Validate, Changes)
     end.
 
-validate_change( Field
-               , Validate
-               , #changeset{changes = Changes} = Changeset ) ->
-    validate(Field, Validate, Changes, Changeset).
+validate_change( #changeset{changes = Changes} = Changeset
+               , Field
+               , Validate ) ->
+    validate(Changeset, Field, Validate, Changes).
 
 validate_data(Field, Validate) ->
     fun(#changeset{data = Data} = Changeset) ->
-        validate(Field, Validate, Data, Changeset)
+        validate(Changeset, Field, Validate, Data)
     end.
 
-validate_data( Field
-             , Validate
-             , #changeset{data = Data} = Changeset ) ->
-    validate(Field, Validate, Data, Changeset).
+validate_data( #changeset{data = Data} = Changeset
+             , Field
+             , Validate ) ->
+    validate(Changeset, Field, Validate, Data).
 
 validate(Field, Validate, Payload) ->
     fun(Changeset) ->
-        validate(Field, Validate, Payload, Changeset)
+        validate(Changeset, Field, Validate, Payload)
     end.
 
-validate(Field, Validate, Payload, #changeset{} = Changeset)
+validate(#changeset{} = Changeset, Field, Validate, Payload)
     when is_function(Validate, 1)
        , is_map(Payload) ->
     do_validate(Field, Validate, Payload, Changeset).
@@ -82,17 +76,20 @@ do_validate(_, _, _, Changeset) ->
     Changeset.
 
 validate_is_required(Fields) ->
-    fun(Changeset) -> validate_is_required(Fields, Changeset) end.
+    fun(Changeset) -> validate_is_required(Changeset, Fields) end.
 
-validate_is_required( [Field | T]
-                    , #changeset{empty_values = EmptyValues} = Changeset ) ->
+validate_is_required(#changeset{} = Changeset, Fields) when is_list(Fields) ->
+    do_validate_is_required(Fields, Changeset).
+
+do_validate_is_required( [Field | T]
+                       , #changeset{empty_values = EmptyValues} = Changeset ) ->
     case is_field_value_truthy(Field, Changeset#changeset.changes, EmptyValues) of
         true ->
-            validate_is_required(T, Changeset);
+            do_validate_is_required(T, Changeset);
         false ->
             case is_field_value_truthy(Field, Changeset#changeset.data, EmptyValues) of
                 true ->
-                    validate_is_required(T, Changeset);
+                    do_validate_is_required(T, Changeset);
                 false ->
                     Error = changeset:error( Field
                                            , <<"is required">>
@@ -104,7 +101,7 @@ validate_is_required( [Field | T]
                                   )
             end
     end;
-validate_is_required([], Changeset) ->
+do_validate_is_required([], Changeset) ->
     Changeset.
 
 % Field
@@ -130,40 +127,40 @@ is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
             false
     end.
 
-validator_by_field_type(atom, Field) ->
-    changeset_validate_is_atom:validate(Field);
-validator_by_field_type(binary, Field) ->
-    changeset_validate_is_binary:validate(Field);
-validator_by_field_type(bitstring, Field) ->
-    changeset_validate_is_bitstring:validate(Field);
-validator_by_field_type(boolean, Field) ->
-    changeset_validate_is_boolean:validate(Field);
-validator_by_field_type(float, Field) ->
-    changeset_validate_is_float:validate(Field);
-validator_by_field_type(function, Field) ->
-    changeset_validate_is_function:validate(Field);
-validator_by_field_type({function, Arity}, Field) ->
-    changeset_validate_is_function:validate({Field, Arity});
-validator_by_field_type(integer, Field) ->
-    changeset_validate_is_integer:validate(Field);
-validator_by_field_type(list, Field) ->
-    changeset_validate_is_list:validate(Field);
-validator_by_field_type(map, Field) ->
-    changeset_validate_is_map:validate(Field);
-validator_by_field_type(pid, Field) ->
-    changeset_validate_is_pid:validate(Field);
-validator_by_field_type(port, Field) ->
-    changeset_validate_is_port:validate(Field);
-validator_by_field_type(record, Field) ->
-    changeset_validate_is_record:validate(Field);
-validator_by_field_type({record, Name}, Field) ->
-    changeset_validate_is_record:validate({Field, Name});
-validator_by_field_type({record, Name, Size}, Field) ->
-    changeset_validate_is_record:validate({Field, Name, Size});
-validator_by_field_type(reference, Field) ->
-    changeset_validate_is_reference:validate(Field);
-validator_by_field_type(tuple, Field) ->
-    changeset_validate_is_tuple:validate(Field).
+validate_change_by_field_type(atom, Field, Changeset) ->
+    changeset_type_validator_is_atom:validate_change(Field, Changeset);
+validate_change_by_field_type(binary, Field, Changeset) ->
+    changeset_type_validator_is_binary:validate_change(Field, Changeset);
+validate_change_by_field_type(bitstring, Field, Changeset) ->
+    changeset_type_validator_is_bitstring:validate_change(Field, Changeset);
+validate_change_by_field_type(boolean, Field, Changeset) ->
+    changeset_type_validator_is_boolean:validate_change(Field, Changeset);
+validate_change_by_field_type(float, Field, Changeset) ->
+    changeset_type_validator_is_float:validate_change(Field, Changeset);
+validate_change_by_field_type(function, Field, Changeset) ->
+    changeset_type_validator_is_function:validate_change(Field, Changeset);
+validate_change_by_field_type({function, Arity}, Field, Changeset) ->
+    changeset_type_validator_is_function:validate_change({Field, Arity}, Changeset);
+validate_change_by_field_type(integer, Field, Changeset) ->
+    changeset_type_validator_is_integer:validate_change(Field, Changeset);
+validate_change_by_field_type(list, Field, Changeset) ->
+    changeset_type_validator_is_list:validate_change(Field, Changeset);
+validate_change_by_field_type(map, Field, Changeset) ->
+    changeset_type_validator_is_map:validate_change(Field, Changeset);
+validate_change_by_field_type(pid, Field, Changeset) ->
+    changeset_type_validator_is_pid:validate_change(Field, Changeset);
+validate_change_by_field_type(port, Field, Changeset) ->
+    changeset_type_validator_is_port:validate_change(Field, Changeset);
+validate_change_by_field_type(record, Field, Changeset) ->
+    changeset_type_validator_is_record:validate_change(Field, Changeset);
+validate_change_by_field_type({record, Name}, Field, Changeset) ->
+    changeset_type_validator_is_record:validate_change({Field, Name}, Changeset);
+validate_change_by_field_type({record, Name, Size}, Field, Changeset) ->
+    changeset_type_validator_is_record:validate_change({Field, Name, Size}, Changeset);
+validate_change_by_field_type(reference, Field, Changeset) ->
+    changeset_type_validator_is_reference:validate_change(Field, Changeset);
+validate_change_by_field_type(tuple, Field, Changeset) ->
+    changeset_type_validator_is_tuple:validate_change(Field, Changeset).
 
 % Value
 
@@ -183,17 +180,17 @@ normalize(Value) ->
 -ifdef(TEST).
 
 validate_is_required_test() ->
-    Changes = #changeset{ data    = #{}
-                        , changes = #{foo => bar}
-                        , fields  = [foo] },
-    ValidChanges = validate_is_required([foo], Changes),
-    InvalidChanges = validate_is_required([bar], Changes),
+    ChangesChangeset = #changeset{ data    = #{}
+                                 , changes = #{foo => bar}
+                                 , fields  = [foo] },
+    ValidChanges = validate_is_required(ChangesChangeset, [foo]),
+    InvalidChanges = validate_is_required(ChangesChangeset, [bar]),
 
-    Data = #changeset{ data    = #{foo => var}
-                     , changes = #{}
-                     , fields  = [foo] },
-    ValidData = validate_is_required([foo], Data),
-    InvalidData = validate_is_required([bar], Data),
+    DataChangeset = #changeset{ data    = #{foo => var}
+                              , changes = #{}
+                              , fields  = [foo] },
+    ValidData = validate_is_required(DataChangeset, [foo]),
+    InvalidData = validate_is_required(DataChangeset, [bar]),
 
     [ { "Should have valid changes"
       , ?assert(ValidChanges#changeset.is_valid)
