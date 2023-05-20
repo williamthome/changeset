@@ -15,16 +15,14 @@
 -endif.
 
 validate(Field) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Boolean) when is_boolean(Boolean) ->
-                [];
-            (_) ->
-                [ changeset:error( Field
-                                 , <<"must be a boolean">>
-                                 , #{validation => is_boolean} ) ]
-        end, Field, Changeset)
-    end.
+    changeset_validator:validate_change(fun
+        (Boolean) when is_boolean(Boolean) ->
+            [];
+        (_) ->
+            [ changeset:error( Field
+                             , <<"must be a boolean">>
+                             , #{validation => is_boolean} ) ]
+    end, Field).
 
 % Test
 

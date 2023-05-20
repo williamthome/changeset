@@ -15,16 +15,14 @@
 -endif.
 
 validate(Field) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Atom) when is_atom(Atom) ->
-                [];
-            (_) ->
-                [ changeset:error( Field
-                                 , <<"must be an atom">>
-                                 , #{validation => is_atom} ) ]
-        end, Field, Changeset)
-    end.
+    changeset_validator:validate_change(fun
+        (Atom) when is_atom(Atom) ->
+            [];
+        (_) ->
+            [ changeset:error( Field
+                             , <<"must be an atom">>
+                             , #{validation => is_atom} ) ]
+    end, Field).
 
 % Test
 

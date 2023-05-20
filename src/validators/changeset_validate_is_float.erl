@@ -15,16 +15,14 @@
 -endif.
 
 validate(Field) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Float) when is_float(Float) ->
-                [];
-            (_) ->
-                [ changeset:error( Field
-                                 , <<"must be a float">>
-                                 , #{validation => is_float} ) ]
-        end, Field, Changeset)
-    end.
+    changeset_validator:validate_change(fun
+        (Float) when is_float(Float) ->
+            [];
+        (_) ->
+            [ changeset:error( Field
+                             , <<"must be a float">>
+                             , #{validation => is_float} ) ]
+    end, Field).
 
 % Test
 

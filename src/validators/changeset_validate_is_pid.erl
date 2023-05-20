@@ -15,16 +15,14 @@
 -endif.
 
 validate(Field) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Pid) when is_pid(Pid) ->
-                [];
-            (_) ->
-                [ changeset:error( Field
-                                 , <<"must be a pid">>
-                                 , #{validation => is_pid} ) ]
-        end, Field, Changeset)
-    end.
+    changeset_validator:validate_change(fun
+        (Pid) when is_pid(Pid) ->
+            [];
+        (_) ->
+            [ changeset:error( Field
+                             , <<"must be a pid">>
+                             , #{validation => is_pid} ) ]
+    end, Field).
 
 % Test
 

@@ -6,7 +6,13 @@
 %%%-----------------------------------------------------------------------------
 -module(changeset_validator).
 
--export([validate_change/3, validate_data/3, validate/4]).
+-export([ validate_change/2
+        , validate_change/3
+        , validate_data/2
+        , validate_data/3
+        , validate/3
+        , validate/4
+        ]).
 -export([validate_is_required/1, validate_is_required/2]).
 -export([validator_by_field_type/2]).
 
@@ -22,15 +28,30 @@
 
 -callback validate(field()) -> fun((#changeset{}) -> return()).
 
+validate_change(Validate, Field) ->
+    fun(#changeset{changes = Changes} = Changeset) ->
+        validate(Validate, Field, Changes, Changeset)
+    end.
+
 validate_change( Validate
                , Field
                , #changeset{changes = Changes} = Changeset ) ->
     validate(Validate, Field, Changes, Changeset).
 
+validate_data(Validate, Field) ->
+    fun(#changeset{data = Data} = Changeset) ->
+        validate(Validate, Field, Data, Changeset)
+    end.
+
 validate_data( Validate
              , Field
              , #changeset{data = Data} = Changeset ) ->
     validate(Validate, Field, Data, Changeset).
+
+validate(Validate, Field, Data) ->
+    fun(Changeset) ->
+        validate(Validate, Field, Data, Changeset)
+    end.
 
 validate(Validate, Field, Data, #changeset{} = Changeset)
     when is_function(Validate, 1)

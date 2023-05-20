@@ -15,16 +15,14 @@
 -endif.
 
 validate(Field) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Binary) when is_binary(Binary) ->
-                [];
-            (_) ->
-                [ changeset:error( Field
-                                 , <<"must be a binary">>
-                                 , #{validation => is_binary} ) ]
-        end, Field, Changeset)
-    end.
+    changeset_validator:validate_change(fun
+        (Binary) when is_binary(Binary) ->
+            [];
+        (_) ->
+            [ changeset:error( Field
+                             , <<"must be a binary">>
+                             , #{validation => is_binary} ) ]
+    end, Field).
 
 % Test
 

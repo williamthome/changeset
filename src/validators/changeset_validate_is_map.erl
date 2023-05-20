@@ -15,16 +15,14 @@
 -endif.
 
 validate(Field) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Map) when is_map(Map) ->
-                [];
-            (_) ->
-                [ changeset:error( Field
-                                 , <<"must be a map">>
-                                 , #{validation => is_map} ) ]
-        end, Field, Changeset)
-    end.
+    changeset_validator:validate_change(fun
+        (Map) when is_map(Map) ->
+            [];
+        (_) ->
+            [ changeset:error( Field
+                             , <<"must be a map">>
+                             , #{validation => is_map} ) ]
+    end, Field).
 
 % Test
 

@@ -15,41 +15,35 @@
 -endif.
 
 validate({Field, Name}) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Change) ->
-                case is_record(Change, Name) of
-                    true ->
-                        [];
-                    false ->
-                        NameBin = atom_to_binary(Name),
-                        [ changeset:error( Field
-                                        , <<"must be a record of name ", NameBin/binary>>
-                                        , #{ validation => is_record
-                                            , record => Name
-                                            } ) ]
-                end
-        end, Field, Changeset)
-    end;
+    changeset_validator:validate_change(fun
+        (Change) ->
+            case is_record(Change, Name) of
+                true ->
+                    [];
+                false ->
+                    NameBin = atom_to_binary(Name),
+                    [ changeset:error( Field
+                                     , <<"must be a record of name ", NameBin/binary>>
+                                     , #{ validation => is_record
+                                         , record => Name } ) ]
+            end
+    end, Field);
 validate({Field, Name, Size}) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (Change) ->
-                case is_record(Change, Name, Size) of
-                    true ->
-                        [];
-                    false ->
-                        NameBin = atom_to_binary(Name),
-                        SizeBin = integer_to_binary(Size),
-                        [ changeset:error( Field
-                                        , <<"must be a record of name ", NameBin/binary, " and size ", SizeBin/binary>>
-                                        , #{ validation => is_record
-                                            , record => Name
-                                            , size => Size
-                                            } ) ]
-                end
-        end, Field, Changeset)
-    end;
+    changeset_validator:validate_change(fun
+        (Change) ->
+            case is_record(Change, Name, Size) of
+                true ->
+                    [];
+                false ->
+                    NameBin = atom_to_binary(Name),
+                    SizeBin = integer_to_binary(Size),
+                    [ changeset:error( Field
+                                      , <<"must be a record of name ", NameBin/binary, " and size ", SizeBin/binary>>
+                                      , #{ validation => is_record
+                                          , record => Name
+                                          , size => Size } ) ]
+            end
+    end, Field);
 validate(Field) when is_atom(Field) ->
     validate({Field, Field}).
 

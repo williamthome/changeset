@@ -15,16 +15,14 @@
 -endif.
 
 validate(Field) ->
-    fun(Changeset) ->
-        changeset_validator:validate_change(fun
-            (List) when is_list(List) ->
-                [];
-            (_) ->
-                [ changeset:error( Field
-                                 , <<"must be a list">>
-                                 , #{validation => is_list} ) ]
-        end, Field, Changeset)
-    end.
+    changeset_validator:validate_change(fun
+        (List) when is_list(List) ->
+            [];
+        (_) ->
+            [ changeset:error( Field
+                             , <<"must be a list">>
+                             , #{validation => is_list} ) ]
+    end, Field).
 
 % Test
 
