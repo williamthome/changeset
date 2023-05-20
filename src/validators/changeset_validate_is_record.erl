@@ -15,7 +15,7 @@
 -endif.
 
 validate({Field, Name}) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Change) ->
             case is_record(Change, Name) of
                 true ->
@@ -27,9 +27,9 @@ validate({Field, Name}) ->
                                      , #{ validation => is_record
                                          , record => Name } ) ]
             end
-    end, Field);
+    end);
 validate({Field, Name, Size}) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Change) ->
             case is_record(Change, Name, Size) of
                 true ->
@@ -43,7 +43,7 @@ validate({Field, Name, Size}) ->
                                           , record => Name
                                           , size => Size } ) ]
             end
-    end, Field);
+    end);
 validate(Field) when is_atom(Field) ->
     validate({Field, Field}).
 

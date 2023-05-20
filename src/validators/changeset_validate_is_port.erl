@@ -15,14 +15,14 @@
 -endif.
 
 validate(Field) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Port) when is_port(Port) ->
             [];
         (_) ->
             [ changeset:error( Field
                              , <<"must be a port">>
                              , #{validation => is_port} ) ]
-    end, Field).
+    end).
 
 % Test
 

@@ -15,14 +15,14 @@
 -endif.
 
 validate(Field) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Integer) when is_integer(Integer) ->
             [];
         (_) ->
             [ changeset:error( Field
                              , <<"must be an integer">>
                              , #{validation => is_integer} ) ]
-    end, Field).
+    end).
 
 % Test
 

@@ -28,47 +28,47 @@
 
 -callback validate(field()) -> fun((#changeset{}) -> return()).
 
-validate_change(Validate, Field) ->
+validate_change(Field, Validate) ->
     fun(#changeset{changes = Changes} = Changeset) ->
-        validate(Validate, Field, Changes, Changeset)
+        validate(Field, Validate, Changes, Changeset)
     end.
 
-validate_change( Validate
-               , Field
+validate_change( Field
+               , Validate
                , #changeset{changes = Changes} = Changeset ) ->
-    validate(Validate, Field, Changes, Changeset).
+    validate(Field, Validate, Changes, Changeset).
 
-validate_data(Validate, Field) ->
+validate_data(Field, Validate) ->
     fun(#changeset{data = Data} = Changeset) ->
-        validate(Validate, Field, Data, Changeset)
+        validate(Field, Validate, Data, Changeset)
     end.
 
-validate_data( Validate
-             , Field
+validate_data( Field
+             , Validate
              , #changeset{data = Data} = Changeset ) ->
-    validate(Validate, Field, Data, Changeset).
+    validate(Field, Validate, Data, Changeset).
 
-validate(Validate, Field, Data) ->
+validate(Field, Validate, Payload) ->
     fun(Changeset) ->
-        validate(Validate, Field, Data, Changeset)
+        validate(Field, Validate, Payload, Changeset)
     end.
 
-validate(Validate, Field, Data, #changeset{} = Changeset)
+validate(Field, Validate, Payload, #changeset{} = Changeset)
     when is_function(Validate, 1)
-       , is_map(Data) ->
-    do_validate(Field, Data, Validate, Changeset).
+       , is_map(Payload) ->
+    do_validate(Field, Validate, Payload, Changeset).
 
 do_validate( Field
-           , Map
            , Validate
+           , Payload
            , #changeset{ default = Default
                        , errors  = Errors } = Changeset )
-    when is_map_key(Field, Map) ->
+    when is_map_key(Field, Payload) ->
     case proplists:lookup(Field, Errors) of
         {Field, _} ->
             Changeset;
         none ->
-            Value = get_field_value(Field, Map, Default),
+            Value = get_field_value(Field, Payload, Default),
             case Validate(Value) of
                 [] ->
                     Changeset;
@@ -97,8 +97,8 @@ validate_is_required( [Field | T]
                     Error = changeset:error( Field
                                            , <<"is required">>
                                            , #{validation => is_required} ),
-                    changeset:pipe( Changeset,
-                                    [ changeset:pop_change(Field)
+                    changeset:pipe( Changeset
+                                  , [ changeset:pop_change(Field)
                                     , changeset:push_error(Error)
                                     ]
                                   )

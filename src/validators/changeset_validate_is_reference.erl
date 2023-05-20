@@ -15,14 +15,14 @@
 -endif.
 
 validate(Field) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Reference) when is_reference(Reference) ->
             [];
         (_) ->
             [ changeset:error( Field
                              , <<"must be a reference">>
                              , #{validation => is_reference} ) ]
-    end, Field).
+    end).
 
 % Test
 

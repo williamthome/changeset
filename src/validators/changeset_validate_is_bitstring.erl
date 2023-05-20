@@ -15,14 +15,14 @@
 -endif.
 
 validate(Field) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Bitstring) when is_bitstring(Bitstring) ->
             [];
         (_) ->
             [ changeset:error( Field
                              , <<"must be a bitstring">>
                              , #{validation => is_bitstring} ) ]
-    end, Field).
+    end).
 
 % Test
 

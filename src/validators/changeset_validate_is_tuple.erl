@@ -15,14 +15,14 @@
 -endif.
 
 validate(Field) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Tuple) when is_tuple(Tuple) ->
             [];
         (_) ->
             [ changeset:error( Field
                              , <<"must be a tuple">>
                              , #{validation => is_tuple} ) ]
-    end, Field).
+    end).
 
 % Test
 

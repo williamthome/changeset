@@ -15,7 +15,7 @@
 -endif.
 
 validate({Field, Arity}) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Function) when is_function(Function, Arity) ->
             [];
         (_) ->
@@ -24,16 +24,16 @@ validate({Field, Arity}) ->
                              , <<"must be a function of arity ", ArityBin/binary>>
                              , #{ validation => is_function
                                 , arity => Arity } ) ]
-    end, Field);
+    end);
 validate(Field) ->
-    changeset_validator:validate_change(fun
+    changeset_validator:validate_change(Field, fun
         (Function) when is_function(Function) ->
             [];
         (_) ->
             [ changeset:error( Field
                              , <<"must be a function">>
                              , #{validation => is_function} ) ]
-    end, Field).
+    end).
 
 % Test
 
