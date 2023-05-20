@@ -68,7 +68,6 @@ cast( Changeset = #changeset{ data = Data
         ),
     lists:foldl(
         fun changeset_type_validator:validate_change/2,
-        % TODO: Check if changes should be merged instead of overridden
         Changeset#changeset{changes = Changes},
         maps:keys(Changes)
     );
