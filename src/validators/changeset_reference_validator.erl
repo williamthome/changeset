@@ -32,7 +32,7 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => list_to_ref("#Ref<0.4192537678.4073193475.71181>")}})))
+      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => make_ref()}})))
       }
     , { "Should be invalid when field is not a reference"
       , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
