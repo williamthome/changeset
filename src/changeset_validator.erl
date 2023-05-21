@@ -128,11 +128,11 @@ is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
 
 % Value
 
-is_falsy(Value, EmptyValues) when is_list(EmptyValues) ->
-    lists:member(normalize(Value), EmptyValues).
-
 is_truthy(Value, Payload) ->
     not is_falsy(Value, Payload).
+
+is_falsy(Value, EmptyValues) when is_list(EmptyValues) ->
+    lists:member(normalize(Value), EmptyValues).
 
 normalize(Value) when is_binary(Value) ->
     string:trim(Value);

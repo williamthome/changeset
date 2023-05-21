@@ -10,7 +10,8 @@
         , find_change/2
         , get_change/2
         , get_change/3
-        , get_changes/1]).
+        , get_changes/1
+        ]).
 -export([cast/3, cast/4]).
 -export([pipe/2]).
 -export([error/3]).
