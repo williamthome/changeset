@@ -108,7 +108,7 @@ error(Field, Msg, Meta) ->
 push_error( {Field, {Msg, Meta}}
           , #changeset{errors = Errors} = Changeset) when is_binary(Msg) ->
     Changeset#changeset{ errors = [{Field, {Msg, Meta}} | Errors]
-                    , is_valid = false };
+                       , is_valid = false };
 push_error({Field, {MsgFun, Meta}}, Changeset) when is_function(MsgFun, 2) ->
     Msg = MsgFun(Field, Meta),
     push_error({Field, {Msg, Meta}}, Changeset).
