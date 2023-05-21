@@ -4,7 +4,7 @@
 %%% @doc Port validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_port_validator).
+-module(changeset_is_port_validator).
 
 -behaviour(changeset_type_validator).
 

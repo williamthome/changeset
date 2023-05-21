@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Bitstring validator module.
+%%% @doc Atom validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_bitstring_validator).
+-module(changeset_is_atom_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Bitstring) when is_bitstring(Bitstring) ->
+        (Atom) when is_atom(Atom) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be a bitstring">>
-                             , #{validation => is_bitstring} ) ]
+                             , <<"must be an atom">>
+                             , #{validation => is_atom} ) ]
     end).
 
 % Test
@@ -33,12 +33,12 @@ validate_change(Field, Changeset) ->
 validate_change_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => <<>>}})
+            validate_change(foo, #changeset{changes = #{foo => bar}})
         ))
       }
-    , { "Should be invalid when field is not a bitstring"
+    , { "Should be invalid when field is not an atom"
       , ?assertNot(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => bar}})
+            validate_change(foo, #changeset{changes = #{foo => <<>>}})
         ))
       }
     ].

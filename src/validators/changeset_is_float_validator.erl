@@ -4,7 +4,7 @@
 %%% @doc Float validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_float_validator).
+-module(changeset_is_float_validator).
 
 -behaviour(changeset_type_validator).
 

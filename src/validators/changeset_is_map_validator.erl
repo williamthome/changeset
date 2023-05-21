@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Integer validator module.
+%%% @doc Map validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_integer_validator).
+-module(changeset_is_map_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Integer) when is_integer(Integer) ->
+        (Map) when is_map(Map) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be an integer">>
-                             , #{validation => is_integer} ) ]
+                             , <<"must be a map">>
+                             , #{validation => is_map} ) ]
     end).
 
 % Test
@@ -33,10 +33,10 @@ validate_change(Field, Changeset) ->
 validate_change_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => 0}})
+            validate_change(foo, #changeset{changes = #{foo => #{}}})
         ))
       }
-    , { "Should be invalid when field is not an integer"
+    , { "Should be invalid when field is not a map"
       , ?assertNot(changeset:is_valid(
             validate_change(foo, #changeset{changes = #{foo => bar}})
         ))

@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Atom validator module.
+%%% @doc Binary validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_atom_validator).
+-module(changeset_is_binary_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Atom) when is_atom(Atom) ->
+        (Binary) when is_binary(Binary) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be an atom">>
-                             , #{validation => is_atom} ) ]
+                             , <<"must be a binary">>
+                             , #{validation => is_binary} ) ]
     end).
 
 % Test
@@ -33,12 +33,12 @@ validate_change(Field, Changeset) ->
 validate_change_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => bar}})
+            validate_change(foo, #changeset{changes = #{foo => <<>>}})
         ))
       }
-    , { "Should be invalid when field is not an atom"
+    , { "Should be invalid when field is not a binary"
       , ?assertNot(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => <<>>}})
+            validate_change(foo, #changeset{changes = #{foo => bar}})
         ))
       }
     ].

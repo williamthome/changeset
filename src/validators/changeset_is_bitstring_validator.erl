@@ -1,10 +1,10 @@
 %%%-----------------------------------------------------------------------------
 %%% @author William Fank Thomé [https://github.com/williamthome]
 %%% @copyright 2023 William Fank Thomé
-%%% @doc Binary validator module.
+%%% @doc Bitstring validator module.
 %%% @end
 %%%-----------------------------------------------------------------------------
--module(changeset_binary_validator).
+-module(changeset_is_bitstring_validator).
 
 -behaviour(changeset_type_validator).
 
@@ -16,12 +16,12 @@
 
 validate_change(Field, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
-        (Binary) when is_binary(Binary) ->
+        (Bitstring) when is_bitstring(Bitstring) ->
             [];
         (_) ->
             [ changeset:error( Field
-                             , <<"must be a binary">>
-                             , #{validation => is_binary} ) ]
+                             , <<"must be a bitstring">>
+                             , #{validation => is_bitstring} ) ]
     end).
 
 % Test
@@ -36,7 +36,7 @@ validate_change_test() ->
             validate_change(foo, #changeset{changes = #{foo => <<>>}})
         ))
       }
-    , { "Should be invalid when field is not a binary"
+    , { "Should be invalid when field is not a bitstring"
       , ?assertNot(changeset:is_valid(
             validate_change(foo, #changeset{changes = #{foo => bar}})
         ))
