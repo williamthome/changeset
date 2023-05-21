@@ -10,9 +10,13 @@
 
 -export([validate_change/2]).
 
+-include("changeset.hrl").
+
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
+
+-spec validate_change(field(), changeset()) -> changeset().
 
 validate_change({Field, Arity}, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
@@ -35,11 +39,7 @@ validate_change(Field, Changeset) ->
                              , #{validation => is_function} ) ]
     end).
 
-% Test
-
 -ifdef(TEST).
-
--include("changeset.hrl").
 
 validate_change_test() ->
     [ { "Should be valid"

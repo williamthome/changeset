@@ -30,25 +30,39 @@
 
 % Props
 
+-spec is_valid(changeset()) -> boolean().
+
 is_valid(#changeset{is_valid = IsValid}) ->
     IsValid.
+
+-spec find_change(field(), changeset()) -> {ok, term()} | error.
 
 find_change(Field, #changeset{changes = Changes}) ->
     maps:find(Field, Changes).
 
+-spec get_change(field(), changeset()) -> term() | no_return().
+
 get_change(Field, #changeset{changes = Changes}) ->
     maps:get(Field, Changes).
 
+-spec get_change(field(), changeset(), Default) -> term() | Default.
+
 get_change(Field, #changeset{changes = Changes}, Default) ->
     maps:get(Field, Changes, Default).
+
+-spec get_changes(changeset()) -> map().
 
 get_changes(#changeset{changes = Changes}) ->
     Changes.
 
 % Cast
 
+-spec cast(changeset() | {map(), map()}, map(), [field()]) -> changeset().
+
 cast(Payload, Params, Permitted) ->
     cast(Payload, Params, Permitted, #{}).
+
+-spec cast(changeset() | {map(), map()}, map(), [field()], map()) -> changeset().
 
 cast( Changeset = #changeset{ data = Data
                             , types = Types
@@ -80,6 +94,8 @@ cast({Data, Types}, Params, Permitted, Opts) ->
                           },
     cast(Changeset, Params, Permitted, Opts).
 
+-spec should_push_change(field(), term(), map(), [field()]) -> boolean().
+
 should_push_change(Field, Value, Data, Permitted) ->
     case lists:member(Field, Permitted) of
         true ->
@@ -87,6 +103,8 @@ should_push_change(Field, Value, Data, Permitted) ->
         false ->
             false
     end.
+
+-spec is_field_value_equals(field(), term(), map()) -> boolean().
 
 is_field_value_equals(Field, Value, Data) ->
     case maps:find(Field, Data) of
@@ -100,13 +118,19 @@ is_field_value_equals(Field, Value, Data) ->
 
 % Map
 
+-spec pipe(changeset(), [pipe()]) -> changeset().
+
 pipe(Changeset, Funs) ->
     lists:foldl(fun(F, CSet) -> F(CSet) end, Changeset, Funs).
 
 % Error
 
+-spec error(field(), msg() | msgfun(), term()) -> error().
+
 error(Field, Msg, Meta) ->
     {Field, {Msg, Meta}}.
+
+-spec push_error(error(), changeset()) -> changeset().
 
 push_error( {Field, {Msg, Meta}}
           , #changeset{errors = Errors} = Changeset) when is_binary(Msg) ->
@@ -116,26 +140,38 @@ push_error({Field, {MsgFun, Meta}}, Changeset) when is_function(MsgFun, 2) ->
     Msg = MsgFun(Field, Meta),
     push_error({Field, {Msg, Meta}}, Changeset).
 
+-spec push_error(error()) -> pipe().
+
 push_error(Error) ->
     fun(Changeset) -> push_error(Error, Changeset) end.
+
+-spec push_errors([error()], changeset()) -> changeset().
 
 push_errors(Errors, Changeset) ->
     lists:foldl( fun(Err, CSet) -> push_error(Err, CSet) end
                , Changeset
                , Errors ).
 
+-spec push_errors([error()]) -> pipe().
+
 push_errors(Errors) ->
     fun(Changeset) -> push_errors(Errors, Changeset) end.
 
 % Change
+
+-spec push_change(field(), term(), changeset()) -> changeset().
 
 push_change( Field
            , Value
            , #changeset{changes = Changes} = Changeset ) ->
     Changeset#changeset{changes = Changes#{Field => Value}}.
 
+-spec push_change(field(), term()) -> pipe().
+
 push_change(Field, Value) ->
     fun(Changeset) -> push_change(Field, Value, Changeset) end.
+
+-spec push_changes(map(), changeset()) -> changeset().
 
 push_changes(Changes, Changeset) when is_list(Changes) ->
     lists:foldl( fun({Field, Value}, CSet) -> push_change(Field, Value, CSet) end
@@ -145,23 +181,31 @@ push_changes( Changes
             , #changeset{changes = CurrChanges} = Changeset ) when is_map(Changes) ->
     Changeset#changeset{changes = maps:merge(CurrChanges, Changes)}.
 
+-spec push_changes(map()) -> pipe().
+
 push_changes(Changes) ->
     fun(Changeset) -> push_changes(Changeset, Changes) end.
+
+-spec pop_change(field(), changeset()) -> changeset().
 
 pop_change(Field, Changeset) ->
     pop_changes([Field], Changeset).
 
+-spec pop_change(field()) -> pipe().
+
 pop_change(Field) ->
     fun(Changeset) -> pop_change(Field, Changeset) end.
+
+-spec pop_changes([field()], changeset()) -> changeset().
 
 pop_changes( Fields
            , #changeset{changes = Changes} = Changeset ) when is_list(Fields) ->
     Changeset#changeset{changes = maps:without(Fields, Changes)}.
 
+-spec pop_changes([field()]) -> pipe().
+
 pop_changes(Fields) ->
     fun(Changeset) -> pop_changes(Fields, Changeset) end.
-
-% Test
 
 -ifdef(TEST).
 

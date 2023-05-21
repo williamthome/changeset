@@ -4,30 +4,6 @@
 %%% @doc Changeset header.
 %%% @end
 %%%-----------------------------------------------------------------------------
--type field()  :: term().
--type meta()   :: term().
--type msg()    :: binary().
--type msgfun() :: fun((field(), meta()) -> binary()).
--type type()   :: atom
-                | binary
-                | bitstring
-                | boolean
-                | float
-                | function
-                | {function, arity()}
-                | integer
-                | list
-                | map
-                | pid
-                | port
-                | record
-                | {record, Name :: atom()}
-                | {record, Name :: atom(), Size :: non_neg_integer()}
-                | reference
-                | tuple
-                .
--type error()  :: {field(), {msg(), meta()}}.
-
 -record(changeset,
     { fields       = []         :: [field()]
     , types        = #{}        :: #{field() := type()}
@@ -39,3 +15,30 @@
     , default      = no_default :: no_default | fun(() -> term())
     , empty_values = [undefined, <<>>] :: [term()]
     }).
+
+-type changeset()  :: #changeset{}.
+-type field()      :: term().
+-type meta()       :: term().
+-type msg()        :: binary().
+-type msgfun()     :: fun((field(), meta()) -> binary()).
+-type type()       :: atom
+                    | binary
+                    | bitstring
+                    | boolean
+                    | float
+                    | function
+                    | {function, arity()}
+                    | integer
+                    | list
+                    | map
+                    | pid
+                    | port
+                    | record
+                    | {record, Name :: atom()}
+                    | {record, Name :: atom(), Size :: non_neg_integer()}
+                    | reference
+                    | tuple
+                    .
+-type error()      :: {field(), {msg() | msgfun(), meta()}}.
+-type pipe()       :: fun((changeset()) -> changeset()).
+-type validation() :: fun((term()) -> [error()]).

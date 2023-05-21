@@ -10,9 +10,13 @@
 
 -export([validate_change/2]).
 
+-include("changeset.hrl").
+
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
+
+-spec validate_change(field(), changeset()) -> changeset().
 
 validate_change({Field, Name}, Changeset) ->
     changeset_validator:validate_change(Changeset, Field, fun
@@ -47,11 +51,7 @@ validate_change({Field, Name, Size}, Changeset) ->
 validate_change(Field, Changeset) when is_atom(Field) ->
     validate_change({Field, Field}, Changeset).
 
-% Test
-
 -ifdef(TEST).
-
--include("changeset.hrl").
 
 -record(foo, {}).
 

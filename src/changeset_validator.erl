@@ -21,35 +21,49 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-spec validate_change(field(), validation()) -> pipe().
+
 validate_change(Field, Validate) ->
     fun(#changeset{changes = Changes} = Changeset) ->
         validate(Changeset, Field, Validate, Changes)
     end.
+
+-spec validate_change(changeset(), field(), validation()) -> changeset().
 
 validate_change( #changeset{changes = Changes} = Changeset
                , Field
                , Validate ) ->
     validate(Changeset, Field, Validate, Changes).
 
+-spec validate_data(field(), validation()) -> pipe().
+
 validate_data(Field, Validate) ->
     fun(#changeset{data = Data} = Changeset) ->
         validate(Changeset, Field, Validate, Data)
     end.
+
+-spec validate_data(changeset(), field(), validation()) -> changeset().
 
 validate_data( #changeset{data = Data} = Changeset
              , Field
              , Validate ) ->
     validate(Changeset, Field, Validate, Data).
 
+-spec validate(field(), validation(), map()) -> pipe().
+
 validate(Field, Validate, Payload) ->
     fun(Changeset) ->
         validate(Changeset, Field, Validate, Payload)
     end.
 
+-spec validate(changeset(), field(), validation(), map()) -> changeset().
+
 validate(#changeset{} = Changeset, Field, Validate, Payload)
     when is_function(Validate, 1)
        , is_map(Payload) ->
     do_validate(Field, Validate, Payload, Changeset).
+
+-spec do_validate(field(), validation(), map(), changeset()) -> changeset().
 
 do_validate( Field
            , Validate
@@ -74,11 +88,17 @@ do_validate( Field
 do_validate(_, _, _, Changeset) ->
     Changeset.
 
+-spec validate_is_required([field()]) -> pipe().
+
 validate_is_required(Fields) ->
     fun(Changeset) -> validate_is_required(Changeset, Fields) end.
 
+-spec validate_is_required(changeset(), [field()]) -> changeset().
+
 validate_is_required(#changeset{} = Changeset, Fields) when is_list(Fields) ->
     do_validate_is_required(Fields, Changeset#changeset{required = Fields}).
+
+-spec do_validate_is_required([field()], changeset()) -> changeset().
 
 do_validate_is_required( [Field | T]
                        , #changeset{empty_values = EmptyValues} = Changeset ) ->
@@ -105,8 +125,10 @@ do_validate_is_required([], Changeset) ->
 
 % Field
 
-get_field_value(Field, Map, Default) when is_map(Map) ->
-    case maps:find(Field, Map) of
+-spec get_field_value(field(), map(), fun(() -> term())) -> term().
+
+get_field_value(Field, Payload, Default) when is_map(Payload) ->
+    case maps:find(Field, Payload) of
         {ok, Value} ->
             Value;
         error ->
@@ -118,8 +140,10 @@ get_field_value(Field, Map, Default) when is_map(Map) ->
             end
     end.
 
-is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
-    case maps:find(Field, Data) of
+-spec is_field_value_truthy(field(), map(), list()) -> boolean().
+
+is_field_value_truthy(Field, Payload, EmptyValues) when is_map(Payload) ->
+    case maps:find(Field, Payload) of
         {ok, Value} ->
             is_truthy(Value, EmptyValues);
         error ->
@@ -128,18 +152,22 @@ is_field_value_truthy(Field, Data, EmptyValues) when is_map(Data) ->
 
 % Value
 
-is_truthy(Value, Payload) ->
-    not is_falsy(Value, Payload).
+-spec is_truthy(term(), nonempty_list()) -> boolean().
+
+is_truthy(Value, EmptyValues) ->
+    not is_falsy(Value, EmptyValues).
+
+-spec is_falsy(term(), nonempty_list()) -> boolean().
 
 is_falsy(Value, EmptyValues) when is_list(EmptyValues) ->
     lists:member(normalize(Value), EmptyValues).
+
+-spec normalize(term()) -> term().
 
 normalize(Value) when is_binary(Value) ->
     string:trim(Value);
 normalize(Value) ->
     Value.
-
-% Test
 
 -ifdef(TEST).
 

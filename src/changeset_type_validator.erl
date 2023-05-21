@@ -10,11 +10,15 @@
 
 -include("changeset.hrl").
 
--callback validate_change(field(), #changeset{}) -> [error()].
+-callback validate_change(field(), changeset()) -> changeset().
+
+-spec validate_change(field(), changeset()) -> changeset().
 
 validate_change(Field, #changeset{types = Types} = Changeset) ->
     FieldType = maps:get(Field, Types),
     do_validate_change(FieldType, Field, Changeset).
+
+-spec do_validate_change(type(), field(), changeset()) -> changeset().
 
 do_validate_change(atom, Field, Changeset) ->
     changeset_is_atom_validator:validate_change(Field, Changeset);
