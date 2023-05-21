@@ -60,11 +60,19 @@ cast( Changeset = #changeset{ data = Data
                 , is_map(Params)
                 , is_list(Permitted)
                 , is_map(Opts) ->
-    Changes = filter_changes(Params, Permitted, Changeset),
-    lists:foldl(
-        fun changeset_type_validator:validate_change/2,
-        Changeset#changeset{changes = Changes},
-        maps:keys(Changes)
+    maps:fold(
+        fun(Field, Value, ChangesetAcc) ->
+            case should_push_change(Field, Value, Data, Permitted) of
+                true ->
+                    changeset_type_validator:validate_change(
+                        Field, push_change(Field, Value, ChangesetAcc)
+                    );
+                false ->
+                    ChangesetAcc
+            end
+        end,
+        Changeset,
+        Params
     );
 cast({Data, Types}, Params, Permitted, Opts) ->
     Changeset = #changeset{ data  = Data
@@ -72,20 +80,15 @@ cast({Data, Types}, Params, Permitted, Opts) ->
                           },
     cast(Changeset, Params, Permitted, Opts).
 
-filter_changes(Params, Permitted, #changeset{data = Data}) ->
-    maps:filter(
-        fun(Field, Value) ->
-            case lists:member(Field, Permitted) of
-                true ->
-                    not is_field_value_equals(Value, Field, Data);
-                false ->
-                    false
-            end
-        end,
-        Params
-    ).
+should_push_change(Field, Value, Data, Permitted) ->
+    case lists:member(Field, Permitted) of
+        true ->
+            not is_field_value_equals(Field, Value, Data);
+        false ->
+            false
+    end.
 
-is_field_value_equals(Value, Field, Data) ->
+is_field_value_equals(Field, Value, Data) ->
     case maps:find(Field, Data) of
         {ok, CurrValue} when is_float(Value); is_float(CurrValue) ->
             CurrValue == Value;
@@ -165,22 +168,30 @@ pop_changes(Fields) ->
 cast_test() ->
     [ { "Should be valid"
       , ?assert(is_valid(
-            cast({#{}, #{foo => binary}}, #{foo => <<>>}, [foo])
+            cast({#{}, #{foo => atom}}, #{foo => bar}, [foo])
         ))
       }
     , { "Should be invalid"
       , ?assertNot(is_valid(
-            cast({#{}, #{foo => binary}}, #{foo => bar}, [foo])
+            cast({#{}, #{foo => atom}}, #{foo => <<>>}, [foo])
         ))
       }
     , { "Should push change"
-      , ?assertEqual(#{foo => <<>>}, get_changes(
-            cast({#{}, #{foo => binary}}, #{foo => <<>>}, [foo])
+      , ?assertEqual(#{foo => bar}, get_changes(
+            cast({#{}, #{foo => atom}}, #{foo => bar}, [foo])
         ))
       }
     , { "Should not push change"
       , ?assertEqual(#{}, get_changes(
-            cast({#{foo => <<>>}, #{foo => binary}}, #{foo => <<>>}, [foo])
+            cast({#{foo => bar}, #{foo => atom}}, #{foo => bar}, [foo])
+        ))
+      }
+    , { "Should preserve changes"
+      , ?assertEqual(#{foo => bar, bar => baz}, get_changes(
+            cast( cast({#{}, #{foo => atom, bar => atom}}, #{foo => bar}, [foo, bar])
+                , #{bar => baz}
+                , [foo, bar]
+            )
         ))
       }
     ].
