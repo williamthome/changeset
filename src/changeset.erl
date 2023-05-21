@@ -6,7 +6,11 @@
 %%%-----------------------------------------------------------------------------
 -module(changeset).
 
--export([is_valid/1, get_changes/1]).
+-export([ is_valid/1
+        , find_change/2
+        , get_change/2
+        , get_change/3
+        , get_changes/1]).
 -export([cast/3, cast/4]).
 -export([pipe/2]).
 -export([error/3]).
@@ -27,6 +31,15 @@
 
 is_valid(#changeset{is_valid = IsValid}) ->
     IsValid.
+
+find_change(Field, #changeset{changes = Changes}) ->
+    maps:find(Field, Changes).
+
+get_change(Field, #changeset{changes = Changes}) ->
+    maps:get(Field, Changes).
+
+get_change(Field, #changeset{changes = Changes}, Default) ->
+    maps:get(Field, Changes, Default).
 
 get_changes(#changeset{changes = Changes}) ->
     Changes.
