@@ -4,9 +4,6 @@
 %%% @doc Changeset header.
 %%% @end
 %%%-----------------------------------------------------------------------------
-
-% NOTE: Fields cannot be a string(). Some functions will
-%       crash when traversing the fields list.
 -type field()  :: term().
 -type meta()   :: term().
 -type msg()    :: binary().
