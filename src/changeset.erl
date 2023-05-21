@@ -159,38 +159,24 @@ pop_changes(Fields) ->
 
 cast_test() ->
     [ { "Should be valid"
-      , ?assert(is_valid(cast( { #{}, #{foo => binary} }
-                             , #{foo => <<>>}
-                             , [foo]
-                             )
-                        )
-               )
+      , ?assert(is_valid(
+            cast({#{}, #{foo => binary}}, #{foo => <<>>}, [foo])
+        ))
       }
     , { "Should be invalid"
-      , ?assertNot(is_valid(cast( { #{}, #{foo => binary} }
-                                , #{foo => bar}
-                                , [foo]
-                                )
-                           )
-                  )
+      , ?assertNot(is_valid(
+            cast({#{}, #{foo => binary}}, #{foo => bar}, [foo])
+        ))
       }
     , { "Should push change"
-      , ?assertEqual( #{foo => <<>>}
-                    , get_changes(cast( { #{}, #{foo => binary} }
-                                      , #{foo => <<>>}
-                                      , [foo]
-                                      )
-                                 )
-                    )
+      , ?assertEqual(#{foo => <<>>}, get_changes(
+            cast({#{}, #{foo => binary}}, #{foo => <<>>}, [foo])
+        ))
       }
     , { "Should not push change"
-      , ?assertEqual( #{}
-                    , get_changes(cast( { #{foo => <<>>}, #{foo => binary} }
-                                      , #{foo => <<>>}
-                                      , [foo]
-                                      )
-                                 )
-                    )
+      , ?assertEqual(#{}, get_changes(
+            cast({#{foo => <<>>}, #{foo => binary}}, #{foo => <<>>}, [foo])
+        ))
       }
     ].
 

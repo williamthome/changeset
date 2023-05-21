@@ -32,10 +32,14 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => list_to_port("#Port<0.4>")}})))
+      , ?assert(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => list_to_port("#Port<0.4>")}})
+        ))
       }
     , { "Should be invalid when field is not a port"
-      , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
+      , ?assertNot(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => bar}})
+        ))
       }
     ].
 

@@ -32,10 +32,14 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => true}})))
+      , ?assert(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => true}})
+        ))
       }
     , { "Should be invalid when field is not a boolean"
-      , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
+      , ?assertNot(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => bar}})
+        ))
       }
     ].
 

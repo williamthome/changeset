@@ -32,10 +32,14 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
+      , ?assert(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => bar}})
+        ))
       }
     , { "Should be invalid when field is not an atom"
-      , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => <<>>}})))
+      , ?assertNot(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => <<>>}})
+        ))
       }
     ].
 

@@ -43,10 +43,14 @@ validate_change(Field, Changeset) ->
 
 validate_change_test() ->
     [ { "Should be valid"
-      , ?assert(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => fun() -> bar end}})))
+      , ?assert(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => fun() -> bar end}})
+        ))
       }
     , { "Should be invalid when field is not a function"
-      , ?assertNot(changeset:is_valid(validate_change(foo, #changeset{changes = #{foo => bar}})))
+      , ?assertNot(changeset:is_valid(
+            validate_change(foo, #changeset{changes = #{foo => bar}})
+        ))
       }
     ].
 
