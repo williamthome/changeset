@@ -171,6 +171,11 @@ cast_test() ->
             cast({#{}, #{foo => atom}}, #{foo => bar}, [foo])
         ))
       }
+    , { "Should be valid when no params provided"
+      , ?assert(is_valid(
+            cast({#{}, #{foo => atom}}, #{}, [foo])
+        ))
+      }
     , { "Should be invalid"
       , ?assertNot(is_valid(
             cast({#{}, #{foo => atom}}, #{foo => <<>>}, [foo])
