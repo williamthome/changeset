@@ -60,26 +60,7 @@ cast( Changeset = #changeset{ data = Data
                 , is_map(Params)
                 , is_list(Permitted)
                 , is_map(Opts) ->
-    Changes =
-        maps:filter(
-            fun(Field, Value) ->
-                case lists:member(Field, Permitted) of
-                    true ->
-                        case maps:find(Field, Data) of
-                            {ok, CurrValue} when is_float(Value)
-                                               ; is_float(CurrValue) ->
-                                CurrValue /= Value;
-                            {ok, CurrValue} ->
-                                CurrValue =/= Value;
-                            error ->
-                                true
-                        end;
-                    false ->
-                        false
-                end
-            end,
-            Params
-        ),
+    Changes = filter_changes(Params, Permitted, Changeset),
     lists:foldl(
         fun changeset_type_validator:validate_change/2,
         Changeset#changeset{changes = Changes},
@@ -90,6 +71,29 @@ cast({Data, Types}, Params, Permitted, Opts) ->
                           , types = Types
                           },
     cast(Changeset, Params, Permitted, Opts).
+
+filter_changes(Params, Permitted, #changeset{data = Data}) ->
+    maps:filter(
+        fun(Field, Value) ->
+            case lists:member(Field, Permitted) of
+                true ->
+                    not is_field_value_equals(Value, Field, Data);
+                false ->
+                    false
+            end
+        end,
+        Params
+    ).
+
+is_field_value_equals(Value, Field, Data) ->
+    case maps:find(Field, Data) of
+        {ok, CurrValue} when is_float(Value); is_float(CurrValue) ->
+            CurrValue == Value;
+        {ok, CurrValue} ->
+            CurrValue =:= Value;
+        error ->
+            false
+    end.
 
 % Map
 
