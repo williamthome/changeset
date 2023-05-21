@@ -176,6 +176,11 @@ cast_test() ->
             cast({#{}, #{foo => atom}}, #{}, [foo])
         ))
       }
+    , { "Should be valid even changes are not permitted"
+      , ?assert(is_valid(
+            cast({#{}, #{foo => atom}}, #{foo => bar}, [])
+        ))
+      }
     , { "Should be invalid"
       , ?assertNot(is_valid(
             cast({#{}, #{foo => atom}}, #{foo => <<>>}, [foo])
