@@ -53,6 +53,8 @@
 -export_type([ t/0
              , field/0
              , type/0
+             , default/0
+             , cast_opts/0
              ]).
 
 -ifdef(TEST).
@@ -92,6 +94,9 @@
                     | tuple
                     .
 -type default()    :: undefined | fun((field()) -> term()).
+-type cast_opts()  :: #{ default      => default()
+                       , empty_values => nonempty_list()
+                       }.
 -type errmeta()    :: term().
 -type errmsg()     :: binary().
 -type errmsg_fun() :: fun((field(), errmeta()) -> errmsg()).
@@ -192,12 +197,25 @@ changed_to(_, _, #changeset{}) ->
 
 % Cast
 
--spec cast(changeset() | {map(), #{field() := type()}}, map(), [field()]) -> changeset().
+-spec cast(Payload, Params, Permitted) -> Changeset
+    when Payload   :: changeset()
+                    | {map(), #{field() := type()}}
+       , Params    :: map()
+       , Permitted :: [field()]
+       , Changeset :: changeset()
+       .
 
 cast(Payload, Params, Permitted) ->
     cast(Payload, Params, Permitted, #{}).
 
--spec cast(changeset() | {map(), #{field() := type()}}, map(), [field()], map()) -> changeset().
+-spec cast(Payload, Params, Permitted, Opts) -> Changeset
+    when Payload   :: changeset()
+                    | {map(), #{field() := type()}}
+       , Params    :: map()
+       , Permitted :: [field()]
+       , Opts      :: cast_opts()
+       , Changeset :: changeset()
+       .
 
 cast( Changeset = #changeset{ data = Data
                             , types = Types
@@ -220,7 +238,7 @@ cast( Changeset = #changeset{ data = Data
                     ChangesetAcc
             end
         end,
-        Changeset,
+        apply_opts(Changeset, Opts),
         Params
     );
 cast({Data, Types}, Params, Permitted, Opts) ->
@@ -228,6 +246,14 @@ cast({Data, Types}, Params, Permitted, Opts) ->
                           , types = Types
                           },
     cast(Changeset, Params, Permitted, Opts).
+
+apply_opts(Changeset, Opts) ->
+    maps:fold(fun apply_opt/3, Changeset, Opts).
+
+apply_opt(default, Default, Changeset) ->
+    Changeset#changeset{default = Default};
+apply_opt(empty_values, EmptyValues, Changeset) ->
+    Changeset#changeset{empty_values = EmptyValues}.
 
 -spec should_push_change(field(), term(), map(), [field()]) -> boolean().
 
