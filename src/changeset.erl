@@ -47,6 +47,7 @@
         , validate_format/2
         , validate_format/4
         , validate_member/2
+        , validate_not_member/2
         ]).
 
 -export_type([ t/0
@@ -461,6 +462,13 @@ validate_format(Field, Regexp, CompileOpts, RunOpts) ->
 validate_member(Field, List) ->
     fun(Changeset) ->
         changeset_member_validator:validate_change(Field, List, Changeset)
+    end.
+
+-spec validate_not_member(field(), nonempty_list()) -> pipe().
+
+validate_not_member(Field, List) ->
+    fun(Changeset) ->
+        changeset_not_member_validator:validate_change(Field, List, Changeset)
     end.
 
 -ifdef(TEST).
