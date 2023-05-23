@@ -46,6 +46,7 @@
         , validate_required/1
         , validate_format/2
         , validate_format/4
+        , validate_member/2
         ]).
 
 -export_type([ t/0
@@ -432,9 +433,9 @@ validate_required(Fields) ->
     end.
 
 -spec validate_format(Field, Regexp) -> Pipe
-    when Field       :: field()
-       , Regexp      :: changeset_regexp_validator:regexp()
-       , Pipe        :: pipe().
+    when Field  :: field()
+       , Regexp :: changeset_regexp_validator:regexp()
+       , Pipe   :: pipe().
 
 validate_format(Field, Regexp) ->
     validate_format(Field, Regexp, [], []).
@@ -453,6 +454,13 @@ validate_format(Field, Regexp, CompileOpts, RunOpts) ->
                                                   , CompileOpts
                                                   , RunOpts
                                                   , Changeset )
+    end.
+
+-spec validate_member(field(), nonempty_list()) -> pipe().
+
+validate_member(Field, List) ->
+    fun(Changeset) ->
+        changeset_member_validator:validate_change(Field, List, Changeset)
     end.
 
 -ifdef(TEST).
