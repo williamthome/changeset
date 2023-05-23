@@ -60,13 +60,13 @@
 -endif.
 
 -record(changeset,
-    { fields       = []         :: [field()]
-    , types        = #{}        :: #{field() := type()}
-    , required     = []         :: [field()]
-    , data         = #{}        :: #{field() => term()}
-    , changes      = #{}        :: #{field() => term()}
-    , errors       = []         :: [error()]
-    , default      = no_default :: no_default | fun(() -> term())
+    { fields       = []                :: [field()]
+    , types        = #{}               :: #{field() := type()}
+    , required     = []                :: [field()]
+    , data         = #{}               :: #{field() => term()}
+    , changes      = #{}               :: #{field() => term()}
+    , errors       = []                :: [error()]
+    , default      = undefined         :: default()
     , empty_values = [undefined, <<>>] :: [term()]
     }).
 -opaque t() :: #changeset{}.
@@ -91,6 +91,7 @@
                     | reference
                     | tuple
                     .
+-type default()    :: undefined | fun((field()) -> term()).
 -type errmeta()    :: term().
 -type errmsg()     :: binary().
 -type errmsg_fun() :: fun((field(), errmeta()) -> errmsg()).
@@ -409,7 +410,7 @@ do_validate( Field
 do_validate(_, _, _, Changeset) ->
     Changeset.
 
--spec get_field_value(field(), map(), fun(() -> term())) -> term().
+-spec get_field_value(field(), map(), default()) -> term().
 
 get_field_value(Field, Payload, Default) when is_map(Payload) ->
     case maps:find(Field, Payload) of
@@ -417,10 +418,10 @@ get_field_value(Field, Payload, Default) when is_map(Payload) ->
             Value;
         error ->
             case Default of
-                no_default ->
+                undefined ->
                     undefined;
-                Default when is_function(Default, 0) ->
-                    Default()
+                Default when is_function(Default, 1) ->
+                    Default(Field)
             end
     end.
 

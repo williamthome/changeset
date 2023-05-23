@@ -50,7 +50,7 @@ we can type the following:
            [name],
            #{},#{},
            [{name,{<<"is required">>,#{validation => is_required}}}],
-           no_default,
+           undefined,
            [undefined,<<>>]}
 
 % The name is not a binary, the changeset will be invalid
@@ -61,7 +61,7 @@ we can type the following:
            #{},
            #{name => foo},
            [{name,{<<"must be a binary">>,#{validation => is_binary}}}],
-           no_default,
+           undefined,
            [undefined,<<>>]}
 
 % The name is present and it's a binary, then the changeset will be valid
@@ -71,7 +71,7 @@ we can type the following:
            [name],
            #{},
            #{name => <<"Erlang: The Movie">>},
-           [],no_default,
+           [],undefined,
            [undefined,<<>>]}
 ```
 
@@ -81,13 +81,13 @@ Currently, this is the changeset record
 
 ```erlang
 -record(changeset,
-    { fields       = []         :: [field()]
-    , types        = #{}        :: #{field() := type()}
-    , required     = []         :: [field()]
-    , data         = #{}        :: #{field() => term()}
-    , changes      = #{}        :: #{field() => term()}
-    , errors       = []         :: [error()]
-    , default      = no_default :: no_default | fun(() -> term())
+    { fields       = []                :: [field()]
+    , types        = #{}               :: #{field() := type()}
+    , required     = []                :: [field()]
+    , data         = #{}               :: #{field() => term()}
+    , changes      = #{}               :: #{field() => term()}
+    , errors       = []                :: [error()]
+    , default      = undefined         :: default()
     , empty_values = [undefined, <<>>] :: [term()]
     }).
 ```
