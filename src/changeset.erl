@@ -67,7 +67,7 @@
     , changes      = #{}               :: #{field() => term()}
     , errors       = []                :: [error()]
     , default      = undefined         :: default()
-    , empty_values = [undefined, <<>>] :: [term()]
+    , empty_values = [undefined, <<>>] :: nonempty_list()
     }).
 -opaque t() :: #changeset{}.
 
