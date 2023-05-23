@@ -28,6 +28,8 @@ changeset(Data, Params) ->
         changeset:validate_required(?REQUIRED)
         % More validators here, e.g.:
         % changeset:validate_format(name, "^[A-Z]")
+        % changeset:validate_member(name, [<<"Mike">>, <<"Joe">>, <<"Robert">>])
+        % changeset:validate_not_member(name, [<<"Me">])
         % changeset:validate_change(name, fun(_Name) -> [] end)
     ]).
 ```
