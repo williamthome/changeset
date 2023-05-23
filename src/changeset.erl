@@ -6,34 +6,109 @@
 %%%-----------------------------------------------------------------------------
 -module(changeset).
 
--export([ is_valid/1
+-export([ get_fields/1
+        , get_data/1
+        , get_changes/1
         , find_change/2
         , get_change/2
         , get_change/3
-        , get_changes/1
+        , get_types/1
+        , get_type/2
+        , get_empty_values/1
+        , get_required/1
+        , set_required/2
+        , is_valid/1
+        , cast/3
+        , cast/4
+        , pipe/2
+        , error/3
+        , push_error/1
+        , push_error/2
+        , push_errors/1
+        , push_errors/2
+        , push_change/2
+        , push_change/3
+        , push_changes/1
+        , push_changes/2
+        , pop_change/1
+        , pop_change/2
+        , pop_changes/1
+        , pop_changes/2
+        , validate_change/2
+        , validate_change/3
+        , validate_data/2
+        , validate_data/3
+        , validate/3
+        , validate/4
+        , validate_required/1
+        , validate_format/2
+        , validate_format/4
         ]).
--export([cast/3, cast/4]).
--export([pipe/2]).
--export([error/3]).
--export([push_error/1, push_error/2]).
--export([push_errors/1, push_errors/2]).
--export([push_change/2, push_change/3]).
--export([push_changes/1, push_changes/2]).
--export([pop_change/1, pop_change/2]).
--export([pop_changes/1, pop_changes/2]).
 
--include("changeset.hrl").
+-export_type([ t/0
+             , field/0
+             , type/0
+             ]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-record(changeset,
+    { fields       = []         :: [field()]
+    , types        = #{}        :: #{field() := type()}
+    , required     = []         :: [field()]
+    , data         = #{}        :: #{field() => term()}
+    , changes      = #{}        :: #{field() => term()}
+    , errors       = []         :: [error()]
+    , default      = no_default :: no_default | fun(() -> term())
+    , empty_values = [undefined, <<>>] :: [term()]
+    }).
+-opaque t() :: #changeset{}.
+
+-type changeset()  :: t().
+-type field()      :: term().
+-type type()       :: atom
+                    | binary
+                    | bitstring
+                    | boolean
+                    | float
+                    | function
+                    | {function, arity()}
+                    | integer
+                    | list
+                    | map
+                    | pid
+                    | port
+                    | record
+                    | {record, Name :: atom()}
+                    | {record, Name :: atom(), Size :: non_neg_integer()}
+                    | reference
+                    | tuple
+                    .
+-type errmeta()    :: term().
+-type errmsg()     :: binary().
+-type errmsg_fun() :: fun((field(), errmeta()) -> errmsg()).
+-type error()      :: {field(), {errmsg() | errmsg_fun(), errmeta()}}.
+-type pipe()       :: fun((changeset()) -> changeset()).
+-type validation() :: fun((term()) -> [error()]).
+
 % Props
 
--spec is_valid(changeset()) -> boolean().
+-spec get_fields(changeset()) -> [field()].
 
-is_valid(#changeset{is_valid = IsValid}) ->
-    IsValid.
+get_fields(#changeset{fields = Fields}) ->
+    Fields.
+
+-spec get_data(changeset()) -> map().
+
+get_data(#changeset{data = Data}) ->
+    Data.
+
+-spec get_changes(changeset()) -> map().
+
+get_changes(#changeset{changes = Changes}) ->
+    Changes.
 
 -spec find_change(field(), changeset()) -> {ok, term()} | error.
 
@@ -50,19 +125,42 @@ get_change(Field, #changeset{changes = Changes}) ->
 get_change(Field, #changeset{changes = Changes}, Default) ->
     maps:get(Field, Changes, Default).
 
--spec get_changes(changeset()) -> map().
+get_types(#changeset{types = Types}) ->
+    Types.
 
-get_changes(#changeset{changes = Changes}) ->
-    Changes.
+-spec get_type(field(), changeset()) -> type().
+
+get_type(Field, #changeset{types = Types}) ->
+    maps:get(Field, Types).
+
+-spec get_empty_values(changeset()) -> list().
+
+get_empty_values(#changeset{empty_values = EmptyValues}) ->
+    EmptyValues.
+
+-spec get_required(changeset()) -> [field()].
+
+get_required(#changeset{required = Required}) ->
+    Required.
+
+-spec set_required([field()], changeset()) -> changeset().
+
+set_required(Fields, #changeset{} = Changeset) ->
+    Changeset#changeset{required = Fields}.
+
+-spec is_valid(changeset()) -> boolean().
+
+is_valid(#changeset{errors = Errors}) ->
+    Errors =:= [].
 
 % Cast
 
--spec cast(changeset() | {map(), map()}, map(), [field()]) -> changeset().
+-spec cast(changeset() | {map(), #{field() := type()}}, map(), [field()]) -> changeset().
 
 cast(Payload, Params, Permitted) ->
     cast(Payload, Params, Permitted, #{}).
 
--spec cast(changeset() | {map(), map()}, map(), [field()], map()) -> changeset().
+-spec cast(changeset() | {map(), #{field() := type()}}, map(), [field()], map()) -> changeset().
 
 cast( Changeset = #changeset{ data = Data
                             , types = Types
@@ -125,7 +223,7 @@ pipe(Changeset, Funs) ->
 
 % Error
 
--spec error(field(), msg() | msgfun(), term()) -> error().
+-spec error(field(), errmsg(), errmeta()) -> error().
 
 error(Field, Msg, Meta) ->
     {Field, {Msg, Meta}}.
@@ -133,9 +231,8 @@ error(Field, Msg, Meta) ->
 -spec push_error(error(), changeset()) -> changeset().
 
 push_error( {Field, {Msg, Meta}}
-          , #changeset{errors = Errors} = Changeset) when is_binary(Msg) ->
-    Changeset#changeset{ errors = [{Field, {Msg, Meta}} | Errors]
-                       , is_valid = false };
+          , #changeset{errors = Errors} = Changeset ) when is_binary(Msg) ->
+    Changeset#changeset{errors = [{Field, {Msg, Meta}} | Errors]};
 push_error({Field, {MsgFun, Meta}}, Changeset) when is_function(MsgFun, 2) ->
     Msg = MsgFun(Field, Meta),
     push_error({Field, {Msg, Meta}}, Changeset).
@@ -206,6 +303,123 @@ pop_changes( Fields
 
 pop_changes(Fields) ->
     fun(Changeset) -> pop_changes(Fields, Changeset) end.
+
+% Validate
+
+-spec validate_change(field(), validation()) -> pipe().
+
+validate_change(Field, Validate) ->
+    fun(#changeset{changes = Changes} = Changeset) ->
+        validate(Changeset, Field, Validate, Changes)
+    end.
+
+-spec validate_change(changeset(), field(), validation()) -> changeset().
+
+validate_change( #changeset{changes = Changes} = Changeset
+               , Field
+               , Validate ) ->
+    validate(Changeset, Field, Validate, Changes).
+
+-spec validate_data(field(), validation()) -> pipe().
+
+validate_data(Field, Validate) ->
+    fun(#changeset{data = Data} = Changeset) ->
+        validate(Changeset, Field, Validate, Data)
+    end.
+
+-spec validate_data(changeset(), field(), validation()) -> changeset().
+
+validate_data( #changeset{data = Data} = Changeset
+             , Field
+             , Validate ) ->
+    validate(Changeset, Field, Validate, Data).
+
+-spec validate(field(), validation(), map()) -> pipe().
+
+validate(Field, Validate, Payload) ->
+    fun(Changeset) ->
+        validate(Changeset, Field, Validate, Payload)
+    end.
+
+-spec validate(changeset(), field(), validation(), map()) -> changeset().
+
+validate(#changeset{} = Changeset, Field, Validate, Payload)
+    when is_function(Validate, 1)
+       , is_map(Payload) ->
+    do_validate(Field, Validate, Payload, Changeset).
+
+-spec do_validate(field(), validation(), map(), changeset()) -> changeset().
+
+do_validate( Field
+           , Validate
+           , Payload
+           , #changeset{ default = Default
+                       , errors  = Errors } = Changeset )
+    when is_map_key(Field, Payload) ->
+    case proplists:lookup(Field, Errors) of
+        {Field, _} ->
+            Changeset;
+        none ->
+            Value = get_field_value(Field, Payload, Default),
+            case Validate(Value) of
+                [] ->
+                    Changeset;
+                NewErrors when is_list(NewErrors) ->
+                    changeset:push_errors(NewErrors, Changeset);
+                #changeset{} = NewChangeset ->
+                    NewChangeset
+            end
+    end;
+do_validate(_, _, _, Changeset) ->
+    Changeset.
+
+-spec get_field_value(field(), map(), fun(() -> term())) -> term().
+
+get_field_value(Field, Payload, Default) when is_map(Payload) ->
+    case maps:find(Field, Payload) of
+        {ok, Value} ->
+            Value;
+        error ->
+            case Default of
+                no_default ->
+                    undefined;
+                Default when is_function(Default, 0) ->
+                    Default()
+            end
+    end.
+
+% Validators
+
+-spec validate_required([field()]) -> pipe().
+
+validate_required(Fields) ->
+    fun(Changeset) ->
+        changeset_is_required_validator:validate(Fields, Changeset)
+    end.
+
+-spec validate_format(Field, Regexp) -> Pipe
+    when Field       :: field()
+       , Regexp      :: changeset_regexp_validator:regexp()
+       , Pipe        :: pipe().
+
+validate_format(Field, Regexp) ->
+    validate_format(Field, Regexp, [], []).
+
+-spec validate_format(Field, Regexp, CompileOpts, RunOpts) -> Pipe
+    when Field       :: field()
+       , Regexp      :: changeset_regexp_validator:regexp()
+       , CompileOpts :: [changeset_regexp_validator:compile_option()]
+       , RunOpts     :: [changeset_regexp_validator:run_option()]
+       , Pipe        :: pipe().
+
+validate_format(Field, Regexp, CompileOpts, RunOpts) ->
+    fun(Changeset) ->
+        changeset_regexp_validator:validate_change( Field
+                                                  , Regexp
+                                                  , CompileOpts
+                                                  , RunOpts
+                                                  , Changeset )
+    end.
 
 -ifdef(TEST).
 

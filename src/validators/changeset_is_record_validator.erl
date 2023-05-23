@@ -10,16 +10,17 @@
 
 -export([validate_change/2]).
 
--include("changeset.hrl").
-
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-type changeset() :: changeset:t().
+-type field()     :: changeset:field().
+
 -spec validate_change(field(), changeset()) -> changeset().
 
 validate_change({Field, Name}, Changeset) ->
-    changeset_validator:validate_change(Changeset, Field, fun
+    changeset:validate_change(Changeset, Field, fun
         (Change) ->
             case is_record(Change, Name) of
                 true ->
@@ -33,7 +34,7 @@ validate_change({Field, Name}, Changeset) ->
             end
     end);
 validate_change({Field, Name, Size}, Changeset) ->
-    changeset_validator:validate_change(Changeset, Field, fun
+    changeset:validate_change(Changeset, Field, fun
         (Change) ->
             case is_record(Change, Name, Size) of
                 true ->
@@ -58,12 +59,16 @@ validate_change(Field, Changeset) when is_atom(Field) ->
 validate_change_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => #foo{}}})
+            validate_change(foo,
+                changeset:cast({#{}, #{foo => record}}, #{foo => #foo{}}, [foo])
+            )
         ))
       }
     , { "Should be invalid when field is not a record"
       , ?assertNot(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => bar}})
+            validate_change(foo,
+                changeset:cast({#{}, #{foo => record}}, #{foo => bar}, [foo])
+            )
         ))
       }
     ].

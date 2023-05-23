@@ -10,16 +10,17 @@
 
 -export([validate_change/2]).
 
--include("changeset.hrl").
-
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-type changeset() :: changeset:t().
+-type field()     :: changeset:field().
+
 -spec validate_change(field(), changeset()) -> changeset().
 
 validate_change({Field, Arity}, Changeset) ->
-    changeset_validator:validate_change(Changeset, Field, fun
+    changeset:validate_change(Changeset, Field, fun
         (Function) when is_function(Function, Arity) ->
             [];
         (_) ->
@@ -30,7 +31,7 @@ validate_change({Field, Arity}, Changeset) ->
                                 , arity => Arity } ) ]
     end);
 validate_change(Field, Changeset) ->
-    changeset_validator:validate_change(Changeset, Field, fun
+    changeset:validate_change(Changeset, Field, fun
         (Function) when is_function(Function) ->
             [];
         (_) ->
@@ -44,12 +45,16 @@ validate_change(Field, Changeset) ->
 validate_change_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => fun() -> bar end}})
+            validate_change(foo,
+                changeset:cast({#{}, #{foo => function}}, #{foo => fun() -> bar end}, [foo])
+            )
         ))
       }
     , { "Should be invalid when field is not a function"
       , ?assertNot(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => bar}})
+            validate_change(foo,
+                changeset:cast({#{}, #{foo => function}}, #{foo => bar}, [foo])
+            )
         ))
       }
     ].

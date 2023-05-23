@@ -8,14 +8,16 @@
 
 -export([validate_change/2]).
 
--include("changeset.hrl").
+-type changeset() :: changeset:t().
+-type field()     :: changeset:field().
+-type type()      :: changeset:type().
 
 -callback validate_change(field(), changeset()) -> changeset().
 
 -spec validate_change(field(), changeset()) -> changeset().
 
-validate_change(Field, #changeset{types = Types} = Changeset) ->
-    FieldType = maps:get(Field, Types),
+validate_change(Field, Changeset) ->
+    FieldType = changeset:get_type(Field, Changeset),
     do_validate_change(FieldType, Field, Changeset).
 
 -spec do_validate_change(type(), field(), changeset()) -> changeset().

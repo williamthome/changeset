@@ -10,16 +10,17 @@
 
 -export([validate_change/2]).
 
--include("changeset.hrl").
-
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-type changeset() :: changeset:t().
+-type field()     :: changeset:field().
+
 -spec validate_change(field(), changeset()) -> changeset().
 
 validate_change(Field, Changeset) ->
-    changeset_validator:validate_change(Changeset, Field, fun
+    changeset:validate_change(Changeset, Field, fun
         (Integer) when is_integer(Integer) ->
             [];
         (_) ->
@@ -33,12 +34,16 @@ validate_change(Field, Changeset) ->
 validate_change_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => 0}})
+            validate_change(foo,
+                changeset:cast({#{}, #{foo => integer}}, #{foo => 0}, [foo])
+            )
         ))
       }
     , { "Should be invalid when field is not an integer"
       , ?assertNot(changeset:is_valid(
-            validate_change(foo, #changeset{changes = #{foo => bar}})
+            validate_change(foo,
+                changeset:cast({#{}, #{foo => integer}}, #{foo => bar}, [foo])
+            )
         ))
       }
     ].

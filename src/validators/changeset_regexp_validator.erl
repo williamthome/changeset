@@ -1,24 +1,24 @@
--module(changeset_regex_validator).
+-module(changeset_regexp_validator).
 
--export([validate_change/3, validate_change/5]).
+-export([validate_change/5]).
 
--include("changeset.hrl").
+-export_type([regexp/0, compile_option/0, run_option/0]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
--spec validate_change(field(), iodata(), changeset()) -> changeset().
+-type changeset()      :: changeset:t().
+-type field()          :: changeset:field().
+-type regexp()         :: iodata().
+-type compile_option() :: term(). % NOTE: re module does not export re:compile_option().
+-type run_option()     :: term(). % NOTE: re module has no type to this option.
 
-validate_change(Field, Regexp, Changeset) ->
-    validate_change(Field, Regexp, [], [], Changeset).
-
-% NOTE: re module does not export types.
 -spec validate_change(Field, Regexp, CompileOpts, RunOpts, Changeset) -> Changeset
     when Field       :: field()
-       , Regexp      :: iodata()
-       , CompileOpts :: list() % [re:compile_option()]
-       , RunOpts     :: list() % [re:?]
+       , Regexp      :: regexp()
+       , CompileOpts :: [compile_option()]
+       , RunOpts     :: [run_option()]
        , Changeset   :: changeset().
 
 validate_change(Field, Regexp, CompileOpts, RunOpts0, Changeset) ->
@@ -26,7 +26,7 @@ validate_change(Field, Regexp, CompileOpts, RunOpts0, Changeset) ->
         {ok, MP} ->
             RunOpts1 = lists:delete(capture, RunOpts0),
             RunOpts = [{capture, none} | RunOpts1],
-            changeset_validator:validate_change(Changeset, Field, fun
+            changeset:validate_change(Changeset, Field, fun
                 (Subject) ->
                     case re:run(Subject, MP, RunOpts) of
                         match ->
@@ -34,8 +34,8 @@ validate_change(Field, Regexp, CompileOpts, RunOpts0, Changeset) ->
                         nomatch ->
                             [ changeset:error( Field
                                              , <<"has invalid format">>
-                                             , #{ validation => regex
-                                                , regex => Regexp } ) ]
+                                             , #{ validation => regexp
+                                                , regexp => Regexp } ) ]
                     end
             end);
         {error, ErrSpec} ->
@@ -48,12 +48,16 @@ validate_change(Field, Regexp, CompileOpts, RunOpts0, Changeset) ->
 validate_change_test() ->
     [ { "Should be valid"
       , ?assert(changeset:is_valid(
-            validate_change(foo, "foo", #changeset{changes = #{foo => "foo"}})
+            validate_change(foo, <<"foo">>, [], [],
+                changeset:cast({#{}, #{foo => binary}}, #{foo => <<"foo">>}, [foo])
+            )
         ))
       }
     , { "Should be invalid when no match"
       , ?assertNot(changeset:is_valid(
-            validate_change(foo, "foo", #changeset{changes = #{foo => "bar"}})
+            validate_change(foo, <<"foo">>, [], [],
+                changeset:cast({#{}, #{foo => binary}}, #{foo => <<"bar">>}, [foo])
+            )
         ))
       }
     ].
