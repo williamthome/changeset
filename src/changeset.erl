@@ -18,6 +18,9 @@
         , get_required/1
         , set_required/2
         , is_valid/1
+        , changed/2
+        , changed_from/3
+        , changed_to/3
         , cast/3
         , cast/4
         , pipe/2
@@ -152,6 +155,37 @@ set_required(Fields, #changeset{} = Changeset) ->
 
 is_valid(#changeset{errors = Errors}) ->
     Errors =:= [].
+
+-spec changed(field(), changeset()) -> boolean().
+
+changed(Field, #changeset{changes = Changes}) ->
+    is_map_key(Field, Changes).
+
+-spec changed_from(field(), term(), changeset()) -> boolean().
+
+changed_from(Field, ExpectedValue, #changeset{data = From, changes = To})
+    when is_map_key(Field, From)
+       , is_map_key(Field, To)
+       , is_float(ExpectedValue) ->
+        maps:get(Field, From) == ExpectedValue;
+changed_from(Field, ExpectedValue, #changeset{data = From, changes = To})
+    when is_map_key(Field, From)
+       , is_map_key(Field, To) ->
+        maps:get(Field, From) =:= ExpectedValue;
+changed_from(_, _, #changeset{}) ->
+    false.
+
+-spec changed_to(field(), term(), changeset()) -> boolean().
+
+changed_to(Field, ExpectedValue, #changeset{changes = To})
+    when is_map_key(Field, To)
+       , is_float(ExpectedValue) ->
+        maps:get(Field, To) == ExpectedValue;
+changed_to(Field, ExpectedValue, #changeset{changes = To})
+    when is_map_key(Field, To) ->
+        maps:get(Field, To) =:= ExpectedValue;
+changed_to(_, _, #changeset{}) ->
+    false.
 
 % Cast
 
