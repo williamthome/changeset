@@ -27,6 +27,7 @@ changeset(Data, Params) ->
     changeset:pipe(Changeset, [
         changeset:validate_required(?REQUIRED)
         % More validators here, e.g.:
+        % changeset:validate_format(name, "^[A-Z]")
         % changeset:validate_change(name, fun(_Name) -> [] end)
     ]).
 ```
@@ -47,7 +48,7 @@ we can type the following:
            [name],
            #{},#{},
            [{name,{<<"is required">>,#{validation => is_required}}}],
-           false,no_default,
+           no_default,
            [undefined,<<>>]}
 
 % The name is not a binary, the changeset will be invalid
@@ -58,7 +59,7 @@ we can type the following:
            #{},
            #{name => foo},
            [{name,{<<"must be a binary">>,#{validation => is_binary}}}],
-           false,no_default,
+           no_default,
            [undefined,<<>>]}
 
 % The name is present and it's a binary, then the changeset will be valid
@@ -68,7 +69,7 @@ we can type the following:
            [name],
            #{},
            #{name => <<"Erlang: The Movie">>},
-           [],true,no_default,
+           [],no_default,
            [undefined,<<>>]}
 ```
 
@@ -84,7 +85,6 @@ Currently, this is the changeset record
     , data         = #{}        :: #{field() => term()}
     , changes      = #{}        :: #{field() => term()}
     , errors       = []         :: [error()]
-    , is_valid     = true       :: boolean()
     , default      = no_default :: no_default | fun(() -> term())
     , empty_values = [undefined, <<>>] :: [term()]
     }).
