@@ -53,7 +53,6 @@
 -export_type([ t/0
              , field/0
              , type/0
-             , default/0
              , cast_opts/0
              ]).
 
@@ -68,7 +67,6 @@
     , data         = #{}               :: #{field() => term()}
     , changes      = #{}               :: #{field() => term()}
     , errors       = []                :: [error()]
-    , default      = undefined         :: default()
     , empty_values = [undefined, <<>>] :: nonempty_list()
     }).
 -opaque t() :: #changeset{}.
@@ -93,10 +91,7 @@
                     | reference
                     | tuple
                     .
--type default()    :: undefined | fun((field()) -> term()).
--type cast_opts()  :: #{ default      => default()
-                       , empty_values => nonempty_list()
-                       }.
+-type cast_opts()  :: #{empty_values => nonempty_list()}.
 -type errmeta()    :: term().
 -type errmsg()     :: binary().
 -type errmsg_fun() :: fun((field(), errmeta()) -> errmsg()).
@@ -250,8 +245,6 @@ cast({Data, Types}, Params, Permitted, Opts) ->
 apply_opts(Changeset, Opts) ->
     maps:fold(fun apply_opt/3, Changeset, Opts).
 
-apply_opt(default, Default, Changeset) ->
-    Changeset#changeset{default = Default};
 apply_opt(empty_values, EmptyValues, Changeset) ->
     Changeset#changeset{empty_values = EmptyValues}.
 
@@ -399,31 +392,30 @@ validate_data( #changeset{data = Data} = Changeset
 
 -spec validate(field(), validation(), map()) -> pipe().
 
-validate(Field, Validate, Payload) ->
+validate(Field, Validate, Params) ->
     fun(Changeset) ->
-        validate(Changeset, Field, Validate, Payload)
+        validate(Changeset, Field, Validate, Params)
     end.
 
 -spec validate(changeset(), field(), validation(), map()) -> changeset().
 
-validate(#changeset{} = Changeset, Field, Validate, Payload)
+validate(#changeset{} = Changeset, Field, Validate, Params)
     when is_function(Validate, 1)
-       , is_map(Payload) ->
-    do_validate(Field, Validate, Payload, Changeset).
+       , is_map(Params) ->
+    do_validate(Field, Validate, Params, Changeset).
 
 -spec do_validate(field(), validation(), map(), changeset()) -> changeset().
 
 do_validate( Field
            , Validate
-           , Payload
-           , #changeset{ default = Default
-                       , errors  = Errors } = Changeset )
-    when is_map_key(Field, Payload) ->
+           , Params
+           , #changeset{errors  = Errors} = Changeset )
+    when is_map_key(Field, Params) ->
     case proplists:lookup(Field, Errors) of
         {Field, _} ->
             Changeset;
         none ->
-            Value = get_field_value(Field, Payload, Default),
+            Value = maps:get(Field, Params),
             case Validate(Value) of
                 [] ->
                     Changeset;
@@ -435,21 +427,6 @@ do_validate( Field
     end;
 do_validate(_, _, _, Changeset) ->
     Changeset.
-
--spec get_field_value(field(), map(), default()) -> term().
-
-get_field_value(Field, Payload, Default) when is_map(Payload) ->
-    case maps:find(Field, Payload) of
-        {ok, Value} ->
-            Value;
-        error ->
-            case Default of
-                undefined ->
-                    undefined;
-                Default when is_function(Default, 1) ->
-                    Default(Field)
-            end
-    end.
 
 % Validators
 

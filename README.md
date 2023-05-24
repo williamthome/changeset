@@ -50,7 +50,6 @@ we can type the following:
            [name],
            #{},#{},
            [{name,{<<"is required">>,#{validation => is_required}}}],
-           undefined,
            [undefined,<<>>]}
 
 % The name is not a binary, the changeset will be invalid
@@ -61,7 +60,6 @@ we can type the following:
            #{},
            #{name => foo},
            [{name,{<<"must be a binary">>,#{validation => is_binary}}}],
-           undefined,
            [undefined,<<>>]}
 
 % The name is present and it's a binary, then the changeset will be valid
@@ -71,7 +69,7 @@ we can type the following:
            [name],
            #{},
            #{name => <<"Erlang: The Movie">>},
-           [],undefined,
+           [],
            [undefined,<<>>]}
 ```
 
@@ -87,7 +85,6 @@ Currently, this is the changeset record
     , data         = #{}               :: #{field() => term()}
     , changes      = #{}               :: #{field() => term()}
     , errors       = []                :: [error()]
-    , default      = undefined         :: default()
     , empty_values = [undefined, <<>>] :: nonempty_list()
     }).
 ```
