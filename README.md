@@ -15,9 +15,9 @@ Take this simple module:
 
 -export([changeset/1, changeset/2]).
 
--define(TYPES,     #{name => binary}).
+-define(TYPES,     #{name => binary, starring => binary}).
 -define(PERMITTED, maps:keys(?TYPES)).
--define(REQUIRED,  maps:keys(?TYPES)).
+-define(REQUIRED,  [name]).
 
 changeset(Params) ->
     changeset(#{}, Params).
@@ -27,10 +27,10 @@ changeset(Data, Params) ->
     changeset:pipe(Changeset, [
         changeset:validate_required(?REQUIRED)
         % More validators here, e.g.:
-        % changeset:validate_format(name, "^[A-Z]")
-        % changeset:validate_member(name, [<<"Mike">>, <<"Joe">>, <<"Robert">>])
-        % changeset:validate_not_member(name, [<<"Me">])
         % changeset:validate_change(name, fun(_Name) -> [] end)
+        % changeset:validate_format(name, "^[A-Z]")
+        % changeset:validate_member(starring, [<<"Mike">>, <<"Joe">>, <<"Robert">>])
+        % changeset:validate_not_member(starring, [<<"Me">])
     ]).
 ```
 
@@ -46,7 +46,7 @@ we can type the following:
 % The name is missing, the changeset will be invalid
 1> movie:changeset(#{}).
 {changeset,[],
-           #{name => binary},
+           #{name => binary,starring => binary},
            [name],
            #{},#{},
            [{name,{<<"is required">>,#{validation => is_required}}}],
@@ -55,7 +55,7 @@ we can type the following:
 % The name is not a binary, the changeset will be invalid
 2> movie:changeset(#{name => foo}).
 {changeset,[],
-           #{name => binary},
+           #{name => binary,starring => binary},
            [name],
            #{},
            #{name => foo},
@@ -65,12 +65,16 @@ we can type the following:
 % The name is present and it's a binary, then the changeset will be valid
 3> movie:changeset(#{name => <<"Erlang: The Movie">>}).
 {changeset,[],
-           #{name => binary},
+           #{name => binary,starring => binary},
            [name],
            #{},
            #{name => <<"Erlang: The Movie">>},
            [],
            [undefined,<<>>]}
+
+% Get the valid changes
+4> changeset:get_changes(v(3)).
+#{name => <<"Erlang: The Movie">>}
 ```
 
 ## Struct
