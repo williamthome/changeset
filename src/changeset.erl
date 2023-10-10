@@ -9,6 +9,8 @@
 -export([ get_fields/1
         , get_data/1
         , get_changes/1
+        , get_errors/1
+        , get_errors/2
         , find_change/2
         , get_change/2
         , get_change/3
@@ -115,6 +117,16 @@ get_data(#changeset{data = Data}) ->
 
 get_changes(#changeset{changes = Changes}) ->
     Changes.
+
+-spec get_errors(changeset()) -> map().
+
+get_errors(#changeset{errors = Errors}) ->
+    Errors.
+
+-spec get_errors(field(), changeset()) -> map().
+
+get_errors(Field, #changeset{errors = Errors}) ->
+    proplists:get_all_values(Field, Errors).
 
 -spec find_change(field(), changeset()) -> {ok, term()} | error.
 
@@ -496,6 +508,12 @@ cast_test() ->
     , { "Should be invalid"
       , ?assertNot(is_valid(
             cast({#{}, #{foo => atom}}, #{foo => <<>>}, [foo])
+        ))
+      }
+    , { "Should return field errors"
+      , ?assertEqual(
+            [{<<"must be an atom">>, #{validation => is_atom}}]
+            , get_errors(foo, cast({#{}, #{foo => atom}}, #{foo => <<>>}, [foo])
         ))
       }
     , { "Should push change"
