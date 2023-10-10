@@ -39,6 +39,7 @@
         , pop_change/2
         , pop_changes/1
         , pop_changes/2
+        , is_field_value_defined/4
         , validate_change/2
         , validate_change/3
         , validate_data/2
@@ -444,6 +445,45 @@ do_validate( Field
     end;
 do_validate(_, _, _, Changeset) ->
     Changeset.
+
+% Helpers
+
+-spec is_field_value_defined(field(), term(), term(), nonempty_list()) -> boolean().
+
+is_field_value_defined(Field, Data, Changes, EmptyValues) ->
+    case is_field_value_truthy(Field, Changes, EmptyValues) of
+        true ->
+            true;
+        false ->
+            is_field_value_truthy(Field, Data, EmptyValues)
+    end.
+
+-spec is_field_value_truthy(field(), map(), list()) -> boolean().
+
+is_field_value_truthy(Field, Payload, EmptyValues) when is_map(Payload) ->
+    case maps:find(Field, Payload) of
+        {ok, Value} ->
+            is_truthy(Value, EmptyValues);
+        error ->
+            false
+    end.
+
+-spec is_truthy(term(), nonempty_list()) -> boolean().
+
+is_truthy(Value, EmptyValues) ->
+    not is_falsy(Value, EmptyValues).
+
+-spec is_falsy(term(), nonempty_list()) -> boolean().
+
+is_falsy(Value, EmptyValues) when is_list(EmptyValues) ->
+    lists:member(normalize(Value), EmptyValues).
+
+-spec normalize(term()) -> term().
+
+normalize(Value) when is_binary(Value) ->
+    string:trim(Value);
+normalize(Value) ->
+    Value.
 
 % Validators
 

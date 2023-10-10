@@ -21,7 +21,7 @@ validate(Fields, Changeset0) when is_list(Fields) ->
 -spec do_validate([field()], map(), map(), list(), changeset()) -> changeset().
 
 do_validate([Field | T], Data, Changes, EmptyValues, Changeset) ->
-    case is_valid(Field, Data, Changes, EmptyValues) of
+    case changeset:is_field_value_defined(Field, Data, Changes, EmptyValues) of
         true ->
             do_validate(T, Data, Changes, EmptyValues, Changeset);
         false ->
@@ -34,41 +34,6 @@ do_validate([Field | T], Data, Changes, EmptyValues, Changeset) ->
     end;
 do_validate([], _, _, _, Changeset) ->
     Changeset.
-
-is_valid(Field, Data, Changes, EmptyValues) ->
-    case is_field_value_truthy(Field, Changes, EmptyValues) of
-        true ->
-            true;
-        false ->
-            is_field_value_truthy(Field, Data, EmptyValues)
-    end.
-
--spec is_field_value_truthy(field(), map(), list()) -> boolean().
-
-is_field_value_truthy(Field, Payload, EmptyValues) when is_map(Payload) ->
-    case maps:find(Field, Payload) of
-        {ok, Value} ->
-            is_truthy(Value, EmptyValues);
-        error ->
-            false
-    end.
-
--spec is_truthy(term(), nonempty_list()) -> boolean().
-
-is_truthy(Value, EmptyValues) ->
-    not is_falsy(Value, EmptyValues).
-
--spec is_falsy(term(), nonempty_list()) -> boolean().
-
-is_falsy(Value, EmptyValues) when is_list(EmptyValues) ->
-    lists:member(normalize(Value), EmptyValues).
-
--spec normalize(term()) -> term().
-
-normalize(Value) when is_binary(Value) ->
-    string:trim(Value);
-normalize(Value) ->
-    Value.
 
 -ifdef(TEST).
 
