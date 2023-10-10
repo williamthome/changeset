@@ -56,6 +56,10 @@
              , field/0
              , type/0
              , cast_opts/0
+             , error/0
+             , field_error/0
+             , pipe/0
+             , validation/0
              ]).
 
 -ifdef(TEST).
@@ -68,38 +72,39 @@
     , required     = []                :: [field()]
     , data         = #{}               :: #{field() => term()}
     , changes      = #{}               :: #{field() => term()}
-    , errors       = []                :: [error()]
+    , errors       = []                :: [field_error()]
     , empty_values = [undefined, <<>>] :: nonempty_list()
     }).
 -opaque t() :: #changeset{}.
 
--type changeset()  :: t().
--type field()      :: term().
--type type()       :: atom
-                    | binary
-                    | bitstring
-                    | boolean
-                    | float
-                    | function
-                    | {function, arity()}
-                    | integer
-                    | list
-                    | map
-                    | pid
-                    | port
-                    | record
-                    | {record, Name :: atom()}
-                    | {record, Name :: atom(), Size :: non_neg_integer()}
-                    | reference
-                    | tuple
-                    .
--type cast_opts()  :: #{empty_values => nonempty_list()}.
--type errmeta()    :: term().
--type errmsg()     :: binary().
--type errmsg_fun() :: fun((field(), errmeta()) -> errmsg()).
--type error()      :: {field(), {errmsg() | errmsg_fun(), errmeta()}}.
--type pipe()       :: fun((changeset()) -> changeset()).
--type validation() :: fun((term()) -> [error()]).
+-type changeset()   :: t().
+-type field()       :: term().
+-type type()        :: atom
+                     | binary
+                     | bitstring
+                     | boolean
+                     | float
+                     | function
+                     | {function, arity()}
+                     | integer
+                     | list
+                     | map
+                     | pid
+                     | port
+                     | record
+                     | {record, Name :: atom()}
+                     | {record, Name :: atom(), Size :: non_neg_integer()}
+                     | reference
+                     | tuple
+                     .
+-type cast_opts()   :: #{empty_values => nonempty_list()}.
+-type errmeta()     :: term().
+-type errmsg()      :: binary().
+-type errmsg_fun()  :: fun((field(), errmeta()) -> errmsg()).
+-type error()       :: {errmsg() | errmsg_fun(), errmeta()}.
+-type field_error() :: {field(), error()}.
+-type pipe()        :: fun((changeset()) -> changeset()).
+-type validation()  :: fun((term()) -> [field_error()]).
 
 % Props
 
@@ -118,12 +123,12 @@ get_data(#changeset{data = Data}) ->
 get_changes(#changeset{changes = Changes}) ->
     Changes.
 
--spec get_errors(changeset()) -> map().
+-spec get_errors(changeset()) -> [field_error()].
 
 get_errors(#changeset{errors = Errors}) ->
     Errors.
 
--spec get_errors(field(), changeset()) -> map().
+-spec get_errors(field(), changeset()) -> [error()].
 
 get_errors(Field, #changeset{errors = Errors}) ->
     proplists:get_all_values(Field, Errors).
@@ -291,12 +296,12 @@ pipe(Changeset, Funs) ->
 
 % Error
 
--spec error(field(), errmsg(), errmeta()) -> error().
+-spec error(field(), errmsg(), errmeta()) -> field_error().
 
 error(Field, Msg, Meta) ->
     {Field, {Msg, Meta}}.
 
--spec push_error(error(), changeset()) -> changeset().
+-spec push_error(field_error(), changeset()) -> changeset().
 
 push_error( {Field, {Msg, Meta}}
           , #changeset{errors = Errors} = Changeset ) when is_binary(Msg) ->
@@ -305,19 +310,19 @@ push_error({Field, {MsgFun, Meta}}, Changeset) when is_function(MsgFun, 2) ->
     Msg = MsgFun(Field, Meta),
     push_error({Field, {Msg, Meta}}, Changeset).
 
--spec push_error(error()) -> pipe().
+-spec push_error(field_error()) -> pipe().
 
 push_error(Error) ->
     fun(Changeset) -> push_error(Error, Changeset) end.
 
--spec push_errors([error()], changeset()) -> changeset().
+-spec push_errors([field_error()], changeset()) -> changeset().
 
 push_errors(Errors, Changeset) ->
     lists:foldl( fun(Err, CSet) -> push_error(Err, CSet) end
                , Changeset
                , Errors ).
 
--spec push_errors([error()]) -> pipe().
+-spec push_errors([field_error()]) -> pipe().
 
 push_errors(Errors) ->
     fun(Changeset) -> push_errors(Errors, Changeset) end.
