@@ -11,6 +11,9 @@
         , get_changes/1
         , get_errors/1
         , get_errors/2
+        , find_data/2
+        , get_data/2
+        , get_data/3
         , find_change/2
         , get_change/2
         , get_change/3
@@ -134,6 +137,21 @@ get_errors(#changeset{errors = Errors}) ->
 
 get_errors(Field, #changeset{errors = Errors}) ->
     proplists:get_all_values(Field, Errors).
+
+-spec find_data(field(), changeset()) -> {ok, term()} | error.
+
+find_data(Field, #changeset{data = Data}) ->
+    maps:find(Field, Data).
+
+-spec get_data(field(), changeset()) -> term() | no_return().
+
+get_data(Field, #changeset{data = Data}) ->
+    maps:get(Field, Data).
+
+-spec get_data(field(), changeset(), Default) -> term() | Default.
+
+get_data(Field, #changeset{data = Data}, Default) ->
+    maps:get(Field, Data, Default).
 
 -spec find_change(field(), changeset()) -> {ok, term()} | error.
 
