@@ -20,6 +20,7 @@
         , get_required/1
         , set_required/2
         , is_valid/1
+        , is_invalid/1
         , changed/2
         , changed_from/3
         , changed_to/3
@@ -176,6 +177,11 @@ set_required(Fields, #changeset{} = Changeset) ->
 
 is_valid(#changeset{errors = Errors}) ->
     Errors =:= [].
+
+-spec is_invalid(changeset()) -> boolean().
+
+is_invalid(Changeset) ->
+    not is_valid(Changeset).
 
 -spec changed(field(), changeset()) -> boolean().
 
